@@ -7,7 +7,7 @@ import Blog from "./pages/Public_Pages/Blog.jsx";
 import Careers from "./pages/Public_Pages/Careers.jsx";
 import Events from "./pages/Public_Pages/Events.jsx";
 import FAQ from "./pages/Public_Pages/FAQ.jsx";
-import Pricing from "./pages/Public_Pages/Pricing.jsx";
+import Pricing from "./pages/Public_Pages/pRICING.JSX";
 import Contact from "./pages/Public_Pages/Contact.jsx";
 import Services from "./pages/Public_Pages/Services.jsx";
 import Login from "./pages/Public_Pages/Login.jsx";
