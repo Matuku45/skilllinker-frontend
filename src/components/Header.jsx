@@ -1,5 +1,5 @@
-// src/components/Header.jsx
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { FaBars, FaTimes, FaSignInAlt, FaUserPlus } from "react-icons/fa";
 
 const Header = () => {
@@ -21,33 +21,33 @@ const Header = () => {
     <header className="bg-white shadow-md fixed w-full z-50">
       <div className="container mx-auto px-6 md:px-20 flex justify-between items-center h-20">
         {/* Logo */}
-        <div className="text-2xl md:text-3xl font-bold text-blue-600">
+        <Link to="/" className="text-2xl md:text-3xl font-bold text-blue-600">
           SkillLinker
-        </div>
+        </Link>
 
         {/* Desktop Menu */}
         <nav className="hidden md:flex gap-6 items-center">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
+              to={link.href}
               className="hover:text-blue-500 transition-colors font-medium"
             >
               {link.name}
-            </a>
+            </Link>
           ))}
-          <a
-            href="/login"
+          <Link
+            to="/login"
             className="btn btn-sm btn-outline flex items-center gap-2"
           >
             <FaSignInAlt /> Login
-          </a>
-          <a
-            href="/register"
+          </Link>
+          <Link
+            to="/register"
             className="btn btn-sm btn-primary flex items-center gap-2"
           >
             <FaUserPlus /> Sign Up
-          </a>
+          </Link>
         </nav>
 
         {/* Mobile Menu Toggle */}
@@ -66,29 +66,29 @@ const Header = () => {
         <div className="md:hidden bg-white shadow-lg w-full absolute top-20 left-0">
           <nav className="flex flex-col gap-4 p-6 text-center">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
-                href={link.href}
+                to={link.href}
                 className="hover:text-blue-500 transition-colors font-medium text-lg"
-                onClick={() => setIsOpen(false)} // close menu when clicked
+                onClick={() => setIsOpen(false)}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
-            <a
-              href="/login"
+            <Link
+              to="/login"
               className="btn btn-outline flex items-center justify-center gap-2 mx-auto mt-4"
               onClick={() => setIsOpen(false)}
             >
               <FaSignInAlt /> Login
-            </a>
-            <a
-              href="/register"
+            </Link>
+            <Link
+              to="/register"
               className="btn btn-primary flex items-center justify-center gap-2 mx-auto mt-2"
               onClick={() => setIsOpen(false)}
             >
               <FaUserPlus /> Sign Up
-            </a>
+            </Link>
           </nav>
         </div>
       )}
