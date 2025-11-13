@@ -1,12 +1,10 @@
 // src/components/Header.jsx
 import React, { useState } from "react";
 import { FaBars, FaTimes, FaSignInAlt, FaUserPlus } from "react-icons/fa";
-import { Fade } from "react-awesome-reveal";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Navigation links to your Public_Pages
   const navLinks = [
     { name: "Home", href: "/home" },
     { name: "About", href: "/about" },
@@ -22,36 +20,34 @@ const Header = () => {
   return (
     <header className="bg-white shadow-md fixed w-full z-50">
       <div className="container mx-auto px-6 md:px-20 flex justify-between items-center h-20">
-        {/* Logo / System Name */}
+        {/* Logo */}
         <div className="text-2xl md:text-3xl font-bold text-blue-600">
           SkillLinker
         </div>
 
         {/* Desktop Menu */}
         <nav className="hidden md:flex gap-6 items-center">
-          <Fade cascade direction="right">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="hover:text-blue-500 transition-colors font-medium"
-              >
-                {link.name}
-              </a>
-            ))}
+          {navLinks.map((link) => (
             <a
-              href="/login"
-              className="btn btn-sm btn-outline flex items-center gap-2"
+              key={link.name}
+              href={link.href}
+              className="hover:text-blue-500 transition-colors font-medium"
             >
-              <FaSignInAlt /> Login
+              {link.name}
             </a>
-            <a
-              href="/register"
-              className="btn btn-sm btn-primary flex items-center gap-2"
-            >
-              <FaUserPlus /> Sign Up
-            </a>
-          </Fade>
+          ))}
+          <a
+            href="/login"
+            className="btn btn-sm btn-outline flex items-center gap-2"
+          >
+            <FaSignInAlt /> Login
+          </a>
+          <a
+            href="/register"
+            className="btn btn-sm btn-primary flex items-center gap-2"
+          >
+            <FaUserPlus /> Sign Up
+          </a>
         </nav>
 
         {/* Mobile Menu Toggle */}
@@ -67,13 +63,14 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white shadow-lg">
+        <div className="md:hidden bg-white shadow-lg w-full absolute top-20 left-0">
           <nav className="flex flex-col gap-4 p-6 text-center">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 className="hover:text-blue-500 transition-colors font-medium text-lg"
+                onClick={() => setIsOpen(false)} // close menu when clicked
               >
                 {link.name}
               </a>
@@ -81,12 +78,14 @@ const Header = () => {
             <a
               href="/login"
               className="btn btn-outline flex items-center justify-center gap-2 mx-auto mt-4"
+              onClick={() => setIsOpen(false)}
             >
               <FaSignInAlt /> Login
             </a>
             <a
               href="/register"
               className="btn btn-primary flex items-center justify-center gap-2 mx-auto mt-2"
+              onClick={() => setIsOpen(false)}
             >
               <FaUserPlus /> Sign Up
             </a>
