@@ -24,7 +24,7 @@ const Home = () => {
               <p className="text-lg md:text-xl mb-8">
                 SkillLinker is your centralized marketplace for Assessors, Moderators, and Skills Development Providers. Find opportunities, connect, and grow your professional network.
               </p>
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
                 <button className="btn btn-primary btn-lg shadow-lg hover:shadow-xl transition-all">
                   Get Started
                 </button>
@@ -71,29 +71,23 @@ const Home = () => {
       <section className="py-20 px-6 md:px-20 bg-gray-50">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Choose SkillLinker?</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="card bg-gradient-to-b from-white to-blue-50 shadow-lg rounded-xl overflow-hidden hover:scale-105 transition-transform">
-            <img src={featureImg1} alt="Job Matching" className="w-full h-40 object-cover" />
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-2">Easy Job Matching</h3>
-              <p className="text-gray-600">SDPs find qualified practitioners in minutes, while practitioners discover relevant opportunities.</p>
+          {[featureImg1, featureImg2, featureImg3].map((img, idx) => (
+            <div key={idx} className="card bg-gradient-to-b from-white to-gray-50 shadow-lg rounded-xl overflow-hidden hover:scale-105 transition-transform">
+              <img src={img} alt="Feature" className="w-full h-40 object-cover" />
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-2">
+                  {idx === 0 && "Easy Job Matching"}
+                  {idx === 1 && "Verified Practitioners"}
+                  {idx === 2 && "Secure & Scalable"}
+                </h3>
+                <p className="text-gray-600">
+                  {idx === 0 && "SDPs find qualified practitioners in minutes, while practitioners discover relevant opportunities."}
+                  {idx === 1 && "Manual or automated verification ensures you connect with trustworthy professionals."}
+                  {idx === 2 && "Built on modern web technologies, SkillLinker scales with your organization’s growth."}
+                </p>
+              </div>
             </div>
-          </div>
-
-          <div className="card bg-gradient-to-b from-white to-green-50 shadow-lg rounded-xl overflow-hidden hover:scale-105 transition-transform">
-            <img src={featureImg2} alt="Verified Practitioners" className="w-full h-40 object-cover" />
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-2">Verified Practitioners</h3>
-              <p className="text-gray-600">Manual or automated verification ensures you connect with trustworthy professionals.</p>
-            </div>
-          </div>
-
-          <div className="card bg-gradient-to-b from-white to-yellow-50 shadow-lg rounded-xl overflow-hidden hover:scale-105 transition-transform">
-            <img src={featureImg3} alt="Secure Platform" className="w-full h-40 object-cover" />
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-2">Secure & Scalable</h3>
-              <p className="text-gray-600">Built on modern web technologies, SkillLinker scales with your organization’s growth.</p>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -103,6 +97,7 @@ const Home = () => {
         <p className="mb-6 text-lg md:text-xl">Create your account and start connecting with verified practitioners or SDPs today.</p>
         <button className="btn btn-primary btn-lg shadow-lg hover:shadow-xl transition-all">Sign Up Now</button>
       </section>
+
     </div>
   );
 };
