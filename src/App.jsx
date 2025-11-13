@@ -1,13 +1,16 @@
+// src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
+
+// Public Pages
 import Home from "./pages/Public_Pages/Home.jsx";
 import About from "./pages/Public_Pages/About.jsx";
 import Blog from "./pages/Public_Pages/Blog.jsx";
 import Careers from "./pages/Public_Pages/Careers.jsx";
 import Events from "./pages/Public_Pages/Events.jsx";
 import FAQ from "./pages/Public_Pages/FAQ.jsx";
-import Pricing from "./pages/Public_Pages/pRICING.JSX";
+import Pricing from "./pages/Public_Pages/Pricing.jsx";
 import Contact from "./pages/Public_Pages/Contact.jsx";
 import Services from "./pages/Public_Pages/Services.jsx";
 import Login from "./pages/Public_Pages/Login.jsx";
@@ -21,9 +24,13 @@ import HelperCenter from "./pages/Public_Pages/HelperCenter.jsx";
 function App() {
   return (
     <Router>
+      {/* Sticky Header */}
       <Header />
-      <div className="mt-20">
+
+      {/* Main Content */}
+      <main className="mt-24 scroll-smooth">
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
@@ -40,9 +47,10 @@ function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/help" element={<HelperCenter />} />
-          <Route path="/" element={<Home />} />
         </Routes>
-      </div>
+      </main>
+
+      {/* Footer */}
       <Footer />
     </Router>
   );
