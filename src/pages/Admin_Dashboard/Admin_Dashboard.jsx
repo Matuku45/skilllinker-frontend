@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
   FaUsers, 
@@ -20,7 +20,7 @@ const AdminDashboard = () => {
   });
 
   // Save jobs to localStorage whenever they change
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('skilllinker_jobs', JSON.stringify(jobs));
   }, [jobs]);
 
@@ -45,10 +45,9 @@ const AdminDashboard = () => {
     setJobs(updatedJobs);
   };
 
-const users = allUsers?.filter(u => u.userType !== 'admin') || [];
-const pendingUsers = users.filter(u => !u.verified);
-const verifiedUsers = users.filter(u => u.verified);
-
+  const users = allUsers?.filter(u => u.userType !== 'admin') || [];
+  const pendingUsers = users.filter(u => !u.verified);
+  const verifiedUsers = users.filter(u => u.verified);
   const totalJobs = jobs.length;
   const openJobs = jobs.filter(job => job.status === 'open').length;
 
