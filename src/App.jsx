@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Public Pages
@@ -26,6 +26,7 @@ import SDPDashboard from './pages/SDP_Dashboard/SDP_Dashboard';
 import AdminDashboard from './pages/Admin_Dashboard/Admin_Dashboard';
 
 // Components
+import Header from './components/Header';
 import Footer from './components/Footer';
 
 // Protected Route Component
@@ -38,13 +39,9 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   if (allowedRoles && !allowedRoles.includes(currentUser?.userType)) {
     // Redirect to appropriate dashboard based on user type
-    if (currentUser?.userType === 'admin') {
-      return <Navigate to="/admin/dashboard" replace />;
-    } else if (currentUser?.userType === 'sdp') {
-      return <Navigate to="/sdp/dashboard" replace />;
-    } else {
-      return <Navigate to="/assessor/dashboard" replace />;
-    }
+    if (currentUser?.userType === 'admin') return <Navigate to="/admin/dashboard" replace />;
+    if (currentUser?.userType === 'sdp') return <Navigate to="/sdp/dashboard" replace />;
+    return <Navigate to="/assessor/dashboard" replace />;
   }
 
   return children;
@@ -55,76 +52,87 @@ const PublicRoute = ({ children }) => {
   const { isAuthenticated, currentUser } = useAuth();
 
   if (isAuthenticated) {
-    // Redirect to appropriate dashboard based on user type
-    if (currentUser?.userType === 'admin') {
-      return <Navigate to="/admin/dashboard" replace />;
-    } else if (currentUser?.userType === 'sdp') {
-      return <Navigate to="/sdp/dashboard" replace />;
-    } else {
-      return <Navigate to="/assessor/dashboard" replace />;
-    }
+    if (currentUser?.userType === 'admin') return <Navigate to="/admin/dashboard" replace />;
+    if (currentUser?.userType === 'sdp') return <Navigate to="/sdp/dashboard" replace />;
+    return <Navigate to="/assessor/dashboard" replace />;
   }
 
   return children;
+};
+
+// App Wrapper to conditionally render Header
+const AppWrapper = () => {
+  const location = useLocation();
+
+  // Hide header for all dashboard routes
+  const hideHeaderRoutes = ['/admin', '/admin/', '/sdp', '/sdp/', '/assessor', '/assessor/'];
+  const hideHeader = hideHeaderRoutes.some((path) => location.pathname.startsWith(path));
+
+  return (
+    <>
+      {!hideHeader && <Header />}
+      <main className={!hideHeader ? 'pt-20' : ''}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/testimonials" element={<Testimonials />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/helper-center" element={<HelperCenter />} />
+
+          {/* Auth Routes */}
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+
+          {/* Protected Dashboard Routes */}
+          <Route
+            path="/assessor/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['assessor', 'moderator']}>
+                <ModeratorAssessorDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sdp/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['sdp']}>
+                <SDPDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+      {!hideHeader && <Footer />}
+    </>
+  );
 };
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="App">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/careers" element={<Careers />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/testimonials" element={<Testimonials />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-            <Route path="/helper-center" element={<HelperCenter />} />
-
-            {/* Auth Routes (redirect if authenticated) */}
-            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-            <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-            <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-
-            {/* Protected Dashboard Routes */}
-            <Route
-              path="/assessor/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={['assessor', 'moderator']}>
-                  <ModeratorAssessorDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/sdp/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={['sdp']}>
-                  <SDPDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-          <Footer />
-        </div>
+        <AppWrapper />
       </Router>
     </AuthProvider>
   );
