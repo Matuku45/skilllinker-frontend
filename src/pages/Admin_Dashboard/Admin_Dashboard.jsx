@@ -45,9 +45,10 @@ const AdminDashboard = () => {
     setJobs(updatedJobs);
   };
 
-  const users = allUsers.filter(u => u.userType !== 'admin');
-  const pendingUsers = users.filter(u => !u.verified);
-  const verifiedUsers = users.filter(u => u.verified);
+const users = allUsers?.filter(u => u.userType !== 'admin') || [];
+const pendingUsers = users.filter(u => !u.verified);
+const verifiedUsers = users.filter(u => u.verified);
+
   const totalJobs = jobs.length;
   const openJobs = jobs.filter(job => job.status === 'open').length;
 

@@ -47,26 +47,27 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
-// Public Route Component (redirects authenticated users)
-const PublicRoute = ({ children }) => {
-  const { isAuthenticated, currentUser } = useAuth();
-
-  if (isAuthenticated) {
-    if (currentUser?.userType === 'admin') return <Navigate to="/admin/dashboard" replace />;
-    if (currentUser?.userType === 'sdp') return <Navigate to="/sdp/dashboard" replace />;
-    return <Navigate to="/assessor/dashboard" replace />;
-  }
-
-  return children;
-};
-
 // App Wrapper to conditionally render Header
 const AppWrapper = () => {
   const location = useLocation();
 
   // Hide header for all dashboard routes
-  const hideHeaderRoutes = ['/admin', '/admin/', '/sdp', '/sdp/', '/assessor', '/assessor/'];
+  const hideHeaderRoutes = ['/admin', '/sdp', '/assessor'];
   const hideHeader = hideHeaderRoutes.some((path) => location.pathname.startsWith(path));
+
+
+
+
+// Public Route Component (redirects authenticated users)
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) {
+    // Redirect authenticated users to their dashboard
+    return <Navigate to="/assessor/dashboard" replace />;
+  }
+  return children;
+};
+
 
   return (
     <>
@@ -89,9 +90,9 @@ const AppWrapper = () => {
           <Route path="/helper-center" element={<HelperCenter />} />
 
           {/* Auth Routes */}
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Protected Dashboard Routes */}
           <Route
