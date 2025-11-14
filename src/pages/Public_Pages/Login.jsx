@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,6 +10,11 @@ const Login = () => {
     password: "",
     rememberMe: false
   });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -16,12 +22,31 @@ const Login = () => {
       ...formData,
       [name]: type === "checkbox" ? checked : value
     });
+    if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Login attempt:", formData);
+    setIsLoading(true);
+    setError("");
+
+    const result = await login(formData.email, formData.password);
+
+    if (result.success) {
+      // Redirect based on user type
+      const userType = result.user.userType;
+      if (userType === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (userType === 'sdp') {
+        navigate('/sdp/dashboard');
+      } else {
+        navigate('/assessor/dashboard');
+      }
+    } else {
+      setError(result.error || "Login failed");
+    }
+
+    setIsLoading(false);
   };
 
   const handleSocialLogin = (provider) => {
@@ -113,12 +138,17 @@ const Login = () => {
             </div>
           </div>
 
+          {error && (
+            <div className="text-red-600 text-sm text-center">{error}</div>
+          )}
+
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              Sign in
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </div>
 
