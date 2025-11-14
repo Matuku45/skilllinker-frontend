@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { mockUsers, mockJobs } from '../../data/mockData';
-import { FaUsers, FaBriefcase, FaCheck, FaTimes, FaEye, FaUserCheck, FaUserTimes } from 'react-icons/fa';
-
+import { 
+  FaUsers, 
+  FaBriefcase, 
+  FaCheck, 
+  FaTimes, 
+  FaEye, 
+  FaUserCheck, 
+  FaUserTimes 
+} from 'react-icons/fa';
 const AdminDashboard = () => {
   const { currentUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
