@@ -20,6 +20,11 @@ import Login from './pages/Public_Pages/Login';
 import Register from './pages/Public_Pages/Register';
 import ForgotPassword from './pages/Public_Pages/ForgotPassword';
 
+
+// Import Profile
+import Profile from './pages/Assessor_Moderator_Dashboard/Profile';
+
+
 // Dashboard Pages
 import ModeratorAssessorDashboard from './pages/Assessor_Moderator_Dashboard/Moderator_Assessor_Dashboard';
 import SDPDashboard from './pages/SDP_Dashboard/SDP_Dashboard';
@@ -54,9 +59,6 @@ const AppWrapper = () => {
   // Hide header for all dashboard routes
   const hideHeaderRoutes = ['/admin', '/sdp', '/assessor'];
   const hideHeader = hideHeaderRoutes.some((path) => location.pathname.startsWith(path));
-
-
-
 
 // Public Route Component (redirects authenticated users)
 const PublicRoute = ({ children }) => {
