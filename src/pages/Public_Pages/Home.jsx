@@ -4,11 +4,6 @@ import { FaUsers, FaBriefcase, FaCheckCircle } from "react-icons/fa";
 import { Fade, Bounce } from "react-awesome-reveal";
 
 // Static placeholder images
-const heroImage = "https://via.placeholder.com/600x400?text=SkillLinker+Hero";
-const featureImg1 = "https://via.placeholder.com/300x200?text=Job+Matching";
-const featureImg2 = "https://via.placeholder.com/300x200?text=Verified+Practitioners";
-const featureImg3 = "https://via.placeholder.com/300x200?text=Secure+Platform";
-
 
 
 
