@@ -1,6 +1,26 @@
 import React, { useState } from "react";
 import { FaCalendar, FaUser, FaTag, FaSearch, FaArrowRight } from "react-icons/fa";
 
+import React, { useState } from "react";
+import { FaCalendar, FaUser, FaTag, FaSearch, FaArrowRight } from "react-icons/fa";
+
+// Import images from assets
+import buildingNetwork from "../assets/building-network-online.webp";
+import job1 from "../assets/job1.webp";
+import job2 from "../assets/job2.webp";
+import miningTech from "../assets/mining-technology.webp";
+import qualityAssurance from "../assets/qualityassurance.webp";
+import reactLogo from "../assets/react.svg";
+import skillbuilder from "../assets/skillbuilder1.webp";
+import skillsForDigital from "../assets/skillsfordigital.webp";
+import southAfrica from "../assets/southafrica.webp";
+import training from "../assets/training.webp";
+import workshop3 from "../assets/woks hop3.webp";
+import workshop from "../assets/workshop.webp";
+import workshop2 from "../assets/workshop2.webp";
+
+
+
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -13,74 +33,81 @@ const Blog = () => {
     { id: "case-studies", name: "Case Studies" }
   ];
 
-  const blogPosts = [
-    {
-      id: 1,
-      title: "The Future of Skills Development in South Africa",
-      excerpt: "Exploring emerging trends and technologies shaping the skills development landscape in South Africa and how practitioners can prepare for the future.",
-      author: "Dr. Thabo Mthembu",
-      date: "2024-11-15",
-      category: "skills-development",
-      readTime: "5 min read",
-      image: "https://via.placeholder.com/400x250?text=Skills+Future",
-      tags: ["Skills Development", "Future Trends", "South Africa"]
-    },
-    {
-      id: 2,
-      title: "Building Trust in Online Professional Networks",
-      excerpt: "How verification processes and transparent communication are revolutionizing professional networking in the skills development sector.",
-      author: "Nomsa Zulu",
-      date: "2024-11-10",
-      category: "industry-insights",
-      readTime: "4 min read",
-      image: "https://via.placeholder.com/400x250?text=Trust+Building",
-      tags: ["Professional Networking", "Trust", "Verification"]
-    },
-    {
-      id: 3,
-      title: "Assessment Best Practices for Modern Learning",
-      excerpt: "A comprehensive guide to implementing effective assessment strategies that align with contemporary learning methodologies and industry standards.",
-      author: "Prof. James van der Merwe",
-      date: "2024-11-05",
-      category: "best-practices",
-      readTime: "7 min read",
-      image: "https://via.placeholder.com/400x250?text=Assessment+Guide",
-      tags: ["Assessment", "Best Practices", "Learning"]
-    },
-    {
-      id: 4,
-      title: "Success Story: Transforming a Mining Company's Training Program",
-      excerpt: "How a leading mining company improved their skills development outcomes by 40% through strategic partnerships and modern assessment methods.",
-      author: "SkillLinker Team",
-      date: "2024-10-28",
-      category: "case-studies",
-      readTime: "6 min read",
-      image: "https://via.placeholder.com/400x250?text=Mining+Success",
-      tags: ["Case Study", "Mining", "Training"]
-    },
-    {
-      id: 5,
-      title: "Digital Transformation in Skills Assessment",
-      excerpt: "The role of technology in modernizing assessment processes and ensuring fair, efficient evaluation of learner competencies.",
-      author: "Dr. Thabo Mthembu",
-      date: "2024-10-20",
-      category: "industry-insights",
-      readTime: "5 min read",
-      image: "https://via.placeholder.com/400x250?text=Digital+Assessment",
-      tags: ["Digital Transformation", "Assessment", "Technology"]
-    },
-    {
-      id: 6,
-      title: "Quality Assurance in Skills Development",
-      excerpt: "Essential frameworks and methodologies for maintaining high standards in skills development programs and practitioner certification.",
-      author: "Nomsa Zulu",
-      date: "2024-10-15",
-      category: "best-practices",
-      readTime: "6 min read",
-      image: "https://via.placeholder.com/400x250?text=Quality+Assurance",
-      tags: ["Quality Assurance", "Standards", "Certification"]
-    }
-  ];
+const blogPosts = [
+  {
+    id: 1,
+    title: "The Future of Skills Development in South Africa",
+    excerpt:
+      "Exploring emerging trends and technologies shaping the skills development landscape in South Africa and how practitioners can prepare for the future.",
+    author: "Dr. Thabo Mthembu",
+    date: "2024-11-15",
+    category: "skills-development",
+    readTime: "5 min read",
+    image: southAfrica,
+    tags: ["Skills Development", "Future Trends", "South Africa"]
+  },
+  {
+    id: 2,
+    title: "Building Trust in Online Professional Networks",
+    excerpt:
+      "How verification processes and transparent communication are revolutionizing professional networking in the skills development sector.",
+    author: "Nomsa Zulu",
+    date: "2024-11-10",
+    category: "industry-insights",
+    readTime: "4 min read",
+    image: buildingNetwork,
+    tags: ["Professional Networking", "Trust", "Verification"]
+  },
+  {
+    id: 3,
+    title: "Assessment Best Practices for Modern Learning",
+    excerpt:
+      "A comprehensive guide to implementing effective assessment strategies that align with contemporary learning methodologies and industry standards.",
+    author: "Prof. James van der Merwe",
+    date: "2024-11-05",
+    category: "best-practices",
+    readTime: "7 min read",
+    image: job1,
+    tags: ["Assessment", "Best Practices", "Learning"]
+  },
+  {
+    id: 4,
+    title: "Success Story: Transforming a Mining Company's Training Program",
+    excerpt:
+      "How a leading mining company improved their skills development outcomes by 40% through strategic partnerships and modern assessment methods.",
+    author: "SkillLinker Team",
+    date: "2024-10-28",
+    category: "case-studies",
+    readTime: "6 min read",
+    image: miningTech,
+    tags: ["Case Study", "Mining", "Training"]
+  },
+  {
+    id: 5,
+    title: "Digital Transformation in Skills Assessment",
+    excerpt:
+      "The role of technology in modernizing assessment processes and ensuring fair, efficient evaluation of learner competencies.",
+    author: "Dr. Thabo Mthembu",
+    date: "2024-10-20",
+    category: "industry-insights",
+    readTime: "5 min read",
+    image: skillsForDigital,
+    tags: ["Digital Transformation", "Assessment", "Technology"]
+  },
+  {
+    id: 6,
+    title: "Quality Assurance in Skills Development",
+    excerpt:
+      "Essential frameworks and methodologies for maintaining high standards in skills development programs and practitioner certification.",
+    author: "Nomsa Zulu",
+    date: "2024-10-15",
+    category: "best-practices",
+    readTime: "6 min read",
+    image: qualityAssurance,
+    tags: ["Quality Assurance", "Standards", "Certification"]
+  }
+];
+
 
   const filteredPosts = blogPosts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -176,7 +203,7 @@ const Blog = () => {
                 ))}
               </div>
             </div>
-          </div>
+          </div>addd
         </section>
 
         {/* Blog Posts Grid */}
