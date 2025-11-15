@@ -1,58 +1,47 @@
 import React from "react";
 import { FaCalendarAlt, FaMapMarkerAlt, FaClock, FaUsers } from "react-icons/fa";
 
+// Import event images
+import summitImg from "../../assets/skillbuilder1.webp";
+import workshopImg from "../../assets/workshop.webp";
+import networkingImg from "../../assets/wokshop3.webp"; 
+
 const Events = () => {
   const upcomingEvents = [
-    {
-      id: 1,
-      title: "Skills Development Summit 2024",
-      date: "2024-03-15",
-      time: "09:00 - 17:00",
-      location: "Sandton Convention Centre, Johannesburg",
-      attendees: 250,
-      description: "Annual summit bringing together SDPs, Assessors, and Moderators to discuss industry trends and innovations.",
-      image: "https://via.placeholder.com/400x250?text=Summit+2024"
-    },
-    {
-      id: 2,
-      title: "Digital Accreditation Workshop",
-      date: "2024-02-28",
-      time: "14:00 - 16:00",
-      location: "Online (Zoom)",
-      attendees: 100,
-      description: "Learn about streamlining accreditation processes using digital tools and platforms.",
-      image: "https://via.placeholder.com/400x250?text=Workshop"
-    },
-    {
-      id: 3,
-      title: "Practitioner Networking Mixer",
-      date: "2024-03-08",
-      time: "18:00 - 21:00",
-      location: "The Vineyard Hotel, Cape Town",
-      attendees: 80,
-      description: "Connect with fellow Assessors and Moderators in a relaxed networking environment.",
-      image: "https://via.placeholder.com/400x250?text=Networking"
-    }
-  ];
-
-  const pastEvents = [
-    {
-      id: 4,
-      title: "SETA Compliance Seminar",
-      date: "2024-01-20",
-      location: "Durban",
-      attendees: 150,
-      description: "Comprehensive overview of SETA compliance requirements for 2024."
-    },
-    {
-      id: 5,
-      title: "Technology in Skills Development",
-      date: "2023-12-10",
-      location: "Online",
-      attendees: 200,
-      description: "Exploring how technology is transforming skills development practices."
-    }
-  ];
+  {
+    id: 1,
+    title: "Skills Development Summit 2024",
+    date: "2024-03-15",
+    time: "09:00 - 17:00",
+    location: "Sandton Convention Centre, Johannesburg",
+    attendees: 250,
+    description:
+      "Annual summit bringing together SDPs, Assessors, and Moderators to discuss industry trends and innovations.",
+    image: summitImg
+  },
+  {
+    id: 2,
+    title: "Digital Accreditation Workshop",
+    date: "2024-02-28",
+    time: "14:00 - 16:00",
+    location: "Online (Zoom)",
+    attendees: 100,
+    description:
+      "Learn about streamlining accreditation processes using digital tools and platforms.",
+    image: workshopImg
+  },
+  {
+    id: 3,
+    title: "Practitioner Networking Mixer",
+    date: "2024-03-08",
+    time: "18:00 - 21:00",
+    location: "The Vineyard Hotel, Cape Town",
+    attendees: 80,
+    description:
+      "Connect with fellow Assessors and Moderators in a relaxed networking environment.",
+    image: networkingImg
+  }
+];
 
   return (
     <div className="min-h-screen bg-gray-50 py-20 px-6 md:px-20">
