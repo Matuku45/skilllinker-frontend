@@ -8,13 +8,13 @@ const ModeratorAssessorDashboard = () => {
   const { currentUser, resume, logout } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [activeTab, setActiveTab] = useState('available');
-  const [showProfile, setShowProfile] = useState(false); // Show profile section
 
+  // Update jobs list whenever the tab or user changes
   useEffect(() => {
     const filteredJobs = mockJobs.filter(job => {
       if (activeTab === 'available') return job.status === 'open';
       if (activeTab === 'applied') return job.applicants.includes(currentUser.id);
-      if (activeTab === 'assigned') return job.assignedTo && job.assignedTo.includes(currentUser.id);
+      if (activeTab === 'assigned') return job.assignedTo?.includes(currentUser.id);
       return false;
     });
     setJobs(filteredJobs);
@@ -25,10 +25,11 @@ const ModeratorAssessorDashboard = () => {
       alert("Please upload your resume in your profile before applying.");
       return;
     }
+
     const job = mockJobs.find(j => j.id === jobId);
     if (job && !job.applicants.includes(currentUser.id)) {
       job.applicants.push(currentUser.id);
-      setJobs([...jobs]);
+      setJobs(prev => prev.map(j => j.id === jobId ? job : j)); // trigger re-render
       alert("Application submitted successfully!");
     }
   };
@@ -37,7 +38,7 @@ const ModeratorAssessorDashboard = () => {
     const job = mockJobs.find(j => j.id === jobId);
     if (job) {
       job.applicants = job.applicants.filter(id => id !== currentUser.id);
-      setJobs([...jobs]);
+      setJobs(prev => prev.map(j => j.id === jobId ? job : j)); // trigger re-render
     }
   };
 
