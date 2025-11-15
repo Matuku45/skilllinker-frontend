@@ -1,33 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { FaUser, FaEnvelope, FaPhone, FaFileUpload } from 'react-icons/fa';
-
-const Messages = ({ messages }) => {
-  return (
-    <div className="mt-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Messages</h2>
-      {messages.length === 0 ? (
-        <p className="text-sm text-gray-500">No messages yet.</p>
-      ) : (
-        <ul className="space-y-2">
-          {messages.map((msg, idx) => (
-            <li key={idx} className="p-3 bg-gray-100 rounded-md">
-              <p className="text-gray-800">{msg}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-};
+import { FaUser, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 const Profile = () => {
   const { currentUser } = useAuth();
-  const [messages] = useState([
-    "Welcome to SkillLinker!",
-    "Your profile verification is pending."
-  ]);
-
   const [resume, setResume] = useState(null);
 
   const handleResumeUpload = (e) => {
@@ -100,9 +76,6 @@ const Profile = () => {
           </button>
         </div>
       </form>
-
-      {/* Messages */}
-      <Messages messages={messages} />
     </div>
   );
 };
