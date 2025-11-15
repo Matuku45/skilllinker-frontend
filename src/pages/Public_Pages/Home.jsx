@@ -6,7 +6,7 @@ import { Fade, Bounce } from "react-awesome-reveal";
 // Local images
 import heroImage from '../../assets/skillbuilder1.webp';
 import featureImg1 from '../../assets/job1.webp';
-
+import featureImg2 from '../../assets/job2.webp';
 import featureImg3 from '../../assets/mining-technology.webp';
 
 const Home = () => {
@@ -16,7 +16,11 @@ const Home = () => {
       title: "Easy Job Matching",
       desc: "SDPs find qualified practitioners in minutes, while practitioners discover relevant opportunities."
     },
-
+    {
+      img: featureImg2,
+      title: "Verified Practitioners",
+      desc: "Manual or automated verification ensures you connect with trustworthy professionals."
+    },
     {
       img: featureImg3,
       title: "Secure & Scalable",
