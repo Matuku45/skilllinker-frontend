@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { FaUser, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 const Profile = () => {
-  const { currentUser } = useAuth();
-  const [resume, setResume] = useState(null);
+  const { currentUser, resume, uploadResume } = useAuth();
 
   const handleResumeUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setResume(file);
+      uploadResume(file); // Save resume in AuthContext
     }
   };
 
@@ -19,7 +18,6 @@ const Profile = () => {
       alert("Please select a resume to upload.");
       return;
     }
-    // Implement actual upload logic here, e.g., API call
     alert(`Resume uploaded: ${resume.name}`);
   };
 
