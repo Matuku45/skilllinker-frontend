@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { mockJobs, getApplicantsForJob } from '../../data/mockData';
 import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaUsers, FaCheck, FaTimes } from 'react-icons/fa';
+import { Messages } from "./Profile"; // imported Messages
 
 const ModeratorAssessorDashboard = () => {
   const { currentUser, logout } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [activeTab, setActiveTab] = useState('available');
+  const [showMessage, setShowMessage] = useState(false); // state to show Messages
 
   useEffect(() => {
-    // Filter jobs based on user type and status
     const filteredJobs = mockJobs.filter(job => {
       if (activeTab === 'available') {
         return job.status === 'open';
@@ -28,6 +29,7 @@ const ModeratorAssessorDashboard = () => {
     if (job && !job.applicants.includes(currentUser.id)) {
       job.applicants.push(currentUser.id);
       setJobs([...jobs]); // Trigger re-render
+      setShowMessage(true); // show Messages component after applying
     }
   };
 
@@ -35,7 +37,7 @@ const ModeratorAssessorDashboard = () => {
     const job = mockJobs.find(j => j.id === jobId);
     if (job) {
       job.applicants = job.applicants.filter(id => id !== currentUser.id);
-      setJobs([...jobs]); // Trigger re-render
+      setJobs([...jobs]);
     }
   };
 
@@ -167,6 +169,8 @@ const ModeratorAssessorDashboard = () => {
             </div>
           ))}
         </div>
+
+        {showMessage && <Messages />} {/* Render Messages after Apply */}
 
         {jobs.length === 0 && (
           <div className="text-center py-12">
