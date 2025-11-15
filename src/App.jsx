@@ -122,6 +122,21 @@ const PublicRoute = ({ children }) => {
             }
           />
 
+
+
+  {/* Profile Route */}
+  <Route
+    path="/profile"
+    element={
+      <ProtectedRoute allowedRoles={['assessor', 'moderator', 'sdp', 'admin']}>
+        <Profile />
+      </ProtectedRoute>
+    }
+  />
+
+
+
+
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
