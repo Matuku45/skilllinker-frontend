@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { mockUsers } from '../data/mockData'; // Make sure you have a mockData.js file exporting mockUsers array
+import { mockUsers } from '../data/mockData'; // Make sure mockUsers is exported from mockData.js
 
 // Create Auth context
 const AuthContext = createContext();
@@ -16,13 +16,18 @@ export const useAuth = () => {
 // AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [resume, setResume] = useState(null); // Added for resume upload
   const [isLoading, setIsLoading] = useState(true);
 
   // Load stored user on initial render
   useEffect(() => {
     const storedUser = localStorage.getItem('skilllinker_user');
+    const storedResume = localStorage.getItem('skilllinker_resume');
     if (storedUser) {
       setCurrentUser(JSON.parse(storedUser));
+    }
+    if (storedResume) {
+      setResume(JSON.parse(storedResume));
     }
     setIsLoading(false);
   }, []);
@@ -55,7 +60,9 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = () => {
     setCurrentUser(null);
+    setResume(null);
     localStorage.removeItem('skilllinker_user');
+    localStorage.removeItem('skilllinker_resume');
   };
 
   // Update user details
@@ -68,6 +75,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Upload resume function
+  const uploadResume = (file) => {
+    setResume(file);
+    // Persist in localStorage
+    const fileData = {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      lastModified: file.lastModified,
+    };
+    localStorage.setItem('skilllinker_resume', JSON.stringify(fileData));
+    console.log('Resume uploaded:', file.name);
+  };
+
   // Context value
   const value = {
     currentUser,
@@ -78,6 +99,8 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     isAuthenticated: !!currentUser,
     allUsers: mockUsers, // expose all mock users for admin dashboard
+    resume,
+    uploadResume,
   };
 
   return (
