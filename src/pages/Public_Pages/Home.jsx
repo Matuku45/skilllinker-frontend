@@ -9,6 +9,17 @@ const featureImg1 = "https://via.placeholder.com/300x200?text=Job+Matching";
 const featureImg2 = "https://via.placeholder.com/300x200?text=Verified+Practitioners";
 const featureImg3 = "https://via.placeholder.com/300x200?text=Secure+Platform";
 
+
+
+
+import heroImage from '../../assets/skillbuilder1.webp';
+import featureImg1 from '../../assets/job1.webp';
+import featureImg2 from '../../assets/qualityassurance skills.webp';
+import featureImg3 from '../../assets/mining-technology.webp';
+
+
+
+
 const Home = () => {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -66,28 +77,28 @@ const Home = () => {
           </Bounce>
         </div>
       </section>
+{/* Hero Section */}
+<img src={heroImage} alt="SkillLinker Hero" className="w-full rounded-xl shadow-lg hover:scale-105 transition-transform" />
 
-      {/* Features Section */}
-      <section className="py-20 px-6 md:px-20 bg-gray-50">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Choose SkillLinker?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[featureImg1, featureImg2, featureImg3].map((img, idx) => (
-            <div key={idx} className="card bg-gradient-to-b from-white to-gray-50 shadow-lg rounded-xl overflow-hidden hover:scale-105 transition-transform">
-              <img src={img} alt="Feature" className="w-full h-40 object-cover" />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">
-                  {idx === 0 && "Easy Job Matching"}
-                  {idx === 1 && "Verified Practitioners"}
-                  {idx === 2 && "Secure & Scalable"}
-                </h3>
-                <p className="text-gray-600">
-                  {idx === 0 && "SDPs find qualified practitioners in minutes, while practitioners discover relevant opportunities."}
-                  {idx === 1 && "Manual or automated verification ensures you connect with trustworthy professionals."}
-                  {idx === 2 && "Built on modern web technologies, SkillLinker scales with your organization’s growth."}
-                </p>
-              </div>
-            </div>
-          ))}
+{/* Features Section */}
+{[featureImg1, featureImg2, featureImg3].map((img, idx) => (
+  <div key={idx} className="card bg-gradient-to-b from-white to-gray-50 shadow-lg rounded-xl overflow-hidden hover:scale-105 transition-transform">
+    <img src={img} alt="Feature" className="w-full h-40 object-cover" />
+    <div className="p-6">
+      <h3 className="text-xl font-semibold mb-2">
+        {idx === 0 && "Easy Job Matching"}
+        {idx === 1 && "Verified Practitioners"}
+        {idx === 2 && "Secure & Scalable"}
+      </h3>
+      <p className="text-gray-600">
+        {idx === 0 && "SDPs find qualified practitioners in minutes, while practitioners discover relevant opportunities."}
+        {idx === 1 && "Manual or automated verification ensures you connect with trustworthy professionals."}
+        {idx === 2 && "Built on modern web technologies, SkillLinker scales with your organization’s growth."}
+      </p>
+    </div>
+  </div>
+))}
+
         </div>
       </section>
 
