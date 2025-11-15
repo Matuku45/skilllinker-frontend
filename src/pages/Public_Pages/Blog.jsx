@@ -1,24 +1,20 @@
 import React, { useState } from "react";
 import { FaCalendar, FaUser, FaTag, FaSearch, FaArrowRight } from "react-icons/fa";
 
-import React, { useState } from "react";
-import { FaCalendar, FaUser, FaTag, FaSearch, FaArrowRight } from "react-icons/fa";
 
-// Import images from assets
-import buildingNetwork from "../assets/building-network-online.webp";
-import job1 from "../assets/job1.webp";
-import job2 from "../assets/job2.webp";
-import miningTech from "../assets/mining-technology.webp";
-import qualityAssurance from "../assets/qualityassurance.webp";
-import reactLogo from "../assets/react.svg";
-import skillbuilder from "../assets/skillbuilder1.webp";
-import skillsForDigital from "../assets/skillsfordigital.webp";
-import southAfrica from "../assets/southafrica.webp";
-import training from "../assets/training.webp";
-import workshop3 from "../assets/woks hop3.webp";
-import workshop from "../assets/workshop.webp";
-import workshop2 from "../assets/workshop2.webp";
+import buildingNetwork from "../../assets/building-network-online.webp";
+import job1 from "../../assets/job1.webp";
+import job2 from "../../assets/job2.webp";
+import miningTech from "../../assets/mining-technology.webp";
 
+import reactLogo from "../../assets/react.svg";
+import skillbuilder from "../../assets/skillbuilder1.webp";
+import skillsForDigital from "../../assets/skillsfordigital.webp";
+import southAfrica from "../../assets/southafrica.webp";
+import training from "../../assets/training.webp";
+import workshop3 from "../../assets/wokshop3.webp";
+import workshop from "../../assets/workshop.webp";
+import workshop2 from "../../assets/workshop2.webp";
 
 
 const Blog = () => {
@@ -93,19 +89,8 @@ const blogPosts = [
     readTime: "5 min read",
     image: skillsForDigital,
     tags: ["Digital Transformation", "Assessment", "Technology"]
-  },
-  {
-    id: 6,
-    title: "Quality Assurance in Skills Development",
-    excerpt:
-      "Essential frameworks and methodologies for maintaining high standards in skills development programs and practitioner certification.",
-    author: "Nomsa Zulu",
-    date: "2024-10-15",
-    category: "best-practices",
-    readTime: "6 min read",
-    image: qualityAssurance,
-    tags: ["Quality Assurance", "Standards", "Certification"]
   }
+
 ];
 
 
