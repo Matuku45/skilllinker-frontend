@@ -2,7 +2,8 @@
 - [x] Update main content area to display selected view
 - [x] Improve styling for professional appearance (colors, spacing, icons)
 - [x] Test the interface for responsiveness and functionality
-- [x] Add header bar with profile, view job, post job options
+- [x] Add custom SDP header bar with profile, post job, view notifications options
 - [x] Include footer in the dashboard
+- [x] Implement profile view functionality
 - [ ] Commit changes to git
 - [ ] Push to GitHub
