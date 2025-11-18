@@ -1,9 +1,13 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const UsersController = require('../Controllers/users.controllers');
+const { validateUser } = require('../MidleWares/users.middleware');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+// Routes
+router.post('/', validateUser, UsersController.createUser);
+router.get('/', UsersController.getAllUsers);
+router.get('/:id', UsersController.getUserById);
+router.put('/:id', validateUser, UsersController.updateUser);
+router.delete('/:id', UsersController.deleteUser);
 
 module.exports = router;
