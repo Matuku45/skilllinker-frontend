@@ -56,8 +56,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 const AppWrapper = () => {
   const location = useLocation();
 
-  // Hide header for admin and assessor dashboard routes, but show for SDP
-  const hideHeaderRoutes = ['/admin', '/assessor'];
+  // Hide header for all dashboard routes
+  const hideHeaderRoutes = ['/admin', '/sdp', '/assessor'];
   const hideHeader = hideHeaderRoutes.some((path) => location.pathname.startsWith(path));
 
 // Public Route Component (redirects authenticated users)

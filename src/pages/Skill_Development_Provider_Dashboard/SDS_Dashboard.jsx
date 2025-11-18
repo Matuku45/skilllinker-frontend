@@ -4,6 +4,8 @@ import { mockJobs, getJobsBySDP } from '../../data/mockData';
 import PostJob from './PostJob';
 import JobDetails from './JobDetails';
 import Notifications from './Notifications';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 
 const SDS_Dashboard = () => {
   const { currentUser } = useAuth();
@@ -40,6 +42,7 @@ const SDS_Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <Header />
       <div className="max-w-6xl mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6">Skill Development Provider Dashboard</h1>
         <p className="mb-6">Welcome, {currentUser.companyName || `${currentUser.firstName} ${currentUser.lastName}`}! Manage your jobs and connect with assessors and moderators.</p>
@@ -56,6 +59,12 @@ const SDS_Dashboard = () => {
             className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
           >
             View Notifications
+          </button>
+          <button
+            onClick={() => setCurrentView('profile')}
+            className="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700"
+          >
+            Profile
           </button>
         </div>
 
@@ -134,6 +143,7 @@ const SDS_Dashboard = () => {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
