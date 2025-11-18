@@ -7,6 +7,21 @@ import Notifications from './Notifications';
 
 import Footer from '../../components/Footer';
 
+// Define custom colors for the dashboard
+const colors = {
+  sidebarBg: '#2c3e50', // Dark blue-gray for sidebar
+  sidebarText: '#ecf0f1', // Light gray for text
+  activeButton: '#3498db', // Bright blue for active button
+  inactiveButton: '#34495e', // Darker blue-gray for inactive
+  primary: '#3498db', // Blue for primary elements
+  secondary: '#95a5a6', // Gray for secondary
+  success: '#27ae60', // Green for success
+  warning: '#f39c12', // Orange for warning
+  danger: '#e74c3c', // Red for danger
+  light: '#ecf0f1', // Light background
+  dark: '#2c3e50', // Dark text
+};
+
 const SDS_Dashboard = () => {
   const { currentUser } = useAuth();
   const [jobs, setJobs] = useState(getJobsBySDP(currentUser.id));
@@ -42,36 +57,56 @@ const SDS_Dashboard = () => {
 
   if (currentView === 'profile') {
     return (
-      <div className="container-fluid min-vh-100 bg-light">
+      <div className="container-fluid min-vh-100" style={{ backgroundColor: colors.light }}>
         <div className="row">
-          <div className="col-md-3 bg-white shadow">
+          <div className="col-md-3 shadow" style={{ backgroundColor: colors.sidebarBg }}>
             <div className="p-4">
-              <h2 className="h4 font-weight-bold text-dark mb-4">Dashboard</h2>
+              <h2 className="h4 font-weight-bold mb-4" style={{ color: colors.sidebarText }}>Dashboard</h2>
               <nav className="nav flex-column">
                 <button
                   onClick={() => setCurrentView('dashboard')}
-                  className={`nav-link text-left py-3 px-3 rounded mb-2 ${currentView === 'dashboard' ? 'bg-primary text-white' : 'text-secondary'}`}
+                  className="nav-link text-left py-3 px-3 rounded mb-2"
+                  style={{
+                    backgroundColor: currentView === 'dashboard' ? colors.activeButton : colors.inactiveButton,
+                    color: colors.sidebarText,
+                    border: 'none'
+                  }}
                 >
                   <i className="fas fa-briefcase mr-3"></i>
                   Your Jobs
                 </button>
                 <button
                   onClick={() => setCurrentView('postJob')}
-                  className={`nav-link text-left py-3 px-3 rounded mb-2 ${currentView === 'postJob' ? 'bg-primary text-white' : 'text-secondary'}`}
+                  className="nav-link text-left py-3 px-3 rounded mb-2"
+                  style={{
+                    backgroundColor: currentView === 'postJob' ? colors.activeButton : colors.inactiveButton,
+                    color: colors.sidebarText,
+                    border: 'none'
+                  }}
                 >
                   <i className="fas fa-plus mr-3"></i>
                   Post a New Job
                 </button>
                 <button
                   onClick={() => setCurrentView('notifications')}
-                  className={`nav-link text-left py-3 px-3 rounded mb-2 ${currentView === 'notifications' ? 'bg-primary text-white' : 'text-secondary'}`}
+                  className="nav-link text-left py-3 px-3 rounded mb-2"
+                  style={{
+                    backgroundColor: currentView === 'notifications' ? colors.activeButton : colors.inactiveButton,
+                    color: colors.sidebarText,
+                    border: 'none'
+                  }}
                 >
                   <i className="fas fa-bell mr-3"></i>
                   Notifications
                 </button>
                 <button
                   onClick={() => setCurrentView('profile')}
-                  className={`nav-link text-left py-3 px-3 rounded mb-2 ${currentView === 'profile' ? 'bg-primary text-white' : 'text-secondary'}`}
+                  className="nav-link text-left py-3 px-3 rounded mb-2"
+                  style={{
+                    backgroundColor: currentView === 'profile' ? colors.activeButton : colors.inactiveButton,
+                    color: colors.sidebarText,
+                    border: 'none'
+                  }}
                 >
                   <i className="fas fa-user mr-3"></i>
                   Profile
@@ -80,14 +115,14 @@ const SDS_Dashboard = () => {
             </div>
           </div>
           <div className="col-md-9 p-4">
-            <h1 className="h3 font-weight-bold mb-4">Profile</h1>
+            <h1 className="h3 font-weight-bold mb-4" style={{ color: colors.dark }}>Profile</h1>
             <div className="card">
               <div className="card-body">
-                <h5 className="card-title">User Information</h5>
-                <p className="card-text"><strong>Name:</strong> {currentUser.companyName || `${currentUser.firstName} ${currentUser.lastName}`}</p>
-                <p className="card-text"><strong>Email:</strong> {currentUser.email}</p>
-                <p className="card-text"><strong>Role:</strong> Skill Development Provider</p>
-                <button onClick={handleBackToDashboard} className="btn btn-secondary">Back to Dashboard</button>
+                <h5 className="card-title" style={{ color: colors.dark }}>User Information</h5>
+                <p className="card-text" style={{ color: colors.dark }}><strong>Name:</strong> {currentUser.companyName || `${currentUser.firstName} ${currentUser.lastName}`}</p>
+                <p className="card-text" style={{ color: colors.dark }}><strong>Email:</strong> {currentUser.email}</p>
+                <p className="card-text" style={{ color: colors.dark }}><strong>Role:</strong> Skill Development Provider</p>
+                <button onClick={handleBackToDashboard} className="btn" style={{ backgroundColor: colors.secondary, color: colors.light }}>Back to Dashboard</button>
               </div>
             </div>
           </div>
