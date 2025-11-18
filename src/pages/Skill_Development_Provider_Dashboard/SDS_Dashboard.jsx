@@ -4,7 +4,7 @@ import { mockJobs, getJobsBySDP } from '../../data/mockData';
 import PostJob from './PostJob';
 import JobDetails from './JobDetails';
 import Notifications from './Notifications';
-import Profile from './Profile';
+import Profile from '../../components/Profile';
 import Footer from '../../components/Footer';
 
 const SDS_Dashboard = () => {
