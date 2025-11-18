@@ -4,7 +4,7 @@ import { mockJobs, getJobsBySDP } from '../../data/mockData';
 import PostJob from './PostJob';
 import JobDetails from './JobDetails';
 import Notifications from './Notifications';
-import Header from '../../components/Header';
+import Profile from './Profile';
 import Footer from '../../components/Footer';
 
 const SDS_Dashboard = () => {
@@ -40,33 +40,70 @@ const SDS_Dashboard = () => {
     return <Notifications onBack={handleBackToDashboard} />;
   }
 
+  if (currentView === 'profile') {
+    return <Profile onBack={handleBackToDashboard} />;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
-      <div className="max-w-6xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-100 flex">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-lg">
+        <div className="p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-8">Dashboard</h2>
+          <nav className="space-y-4">
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className={`w-full text-left py-3 px-4 rounded-lg transition-colors ${
+                currentView === 'dashboard' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <svg className="w-5 h-5 inline mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z" />
+              </svg>
+              Your Jobs
+            </button>
+            <button
+              onClick={() => setCurrentView('postJob')}
+              className={`w-full text-left py-3 px-4 rounded-lg transition-colors ${
+                currentView === 'postJob' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <svg className="w-5 h-5 inline mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Post a New Job
+            </button>
+            <button
+              onClick={() => setCurrentView('notifications')}
+              className={`w-full text-left py-3 px-4 rounded-lg transition-colors ${
+                currentView === 'notifications' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <svg className="w-5 h-5 inline mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM15 7h5l-5-5v5zM4 12h9" />
+              </svg>
+              Notifications
+            </button>
+            <button
+              onClick={() => setCurrentView('profile')}
+              className={`w-full text-left py-3 px-4 rounded-lg transition-colors ${
+                currentView === 'profile' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <svg className="w-5 h-5 inline mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Profile
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold mb-6">Skill Development Provider Dashboard</h1>
         <p className="mb-6">Welcome, {currentUser.companyName || `${currentUser.firstName} ${currentUser.lastName}`}! Manage your jobs and connect with assessors and moderators.</p>
-
-        <div className="mb-6 flex space-x-4">
-          <button
-            onClick={() => setCurrentView('postJob')}
-            className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
-          >
-            Post a New Job
-          </button>
-          <button
-            onClick={() => setCurrentView('notifications')}
-            className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
-          >
-            View Notifications
-          </button>
-          <button
-            onClick={() => setCurrentView('profile')}
-            className="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700"
-          >
-            Profile
-          </button>
-        </div>
 
         <div className="bg-white shadow-sm rounded-lg p-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Posted Jobs</h2>
