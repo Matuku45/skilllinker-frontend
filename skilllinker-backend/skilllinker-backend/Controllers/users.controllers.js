@@ -1,55 +1,49 @@
-// Controllers/users.controllers.js
-const UserService = require('../Services/users.services');
+const usersService = require('../Services/users.services');
 
-class UsersController {
-  static async createUser(req, res) {
+module.exports = {
+  register: async (req, res) => {
     try {
-      const user = await UserService.createUser(req.body);
-      res.status(201).json({ message: 'User created', user });
+      const user = await usersService.createUser(req.body);
+      res.status(201).json({ message: 'User registered', user });
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Error creating user', error: err.message });
+      res.status(400).json({ error: err.message });
     }
-  }
+  },
 
-  static async getAllUsers(req, res) {
+  login: async (req, res) => {
     try {
-      const users = await UserService.getAllUsers();
+      const { email, password } = req.body;
+      const result = await usersService.login(email, password);
+      res.json(result);
+    } catch (err) {
+      res.status(401).json({ error: err.message });
+    }
+  },
+
+  getAll: async (req, res) => {
+    try {
+      const users = await usersService.getAllUsers();
       res.json(users);
     } catch (err) {
-      res.status(500).json({ message: 'Error fetching users', error: err.message });
+      res.status(500).json({ error: err.message });
     }
-  }
+  },
 
-  static async getUserById(req, res) {
+  update: async (req, res) => {
     try {
-      const user = await UserService.getUserById(req.params.id);
-      if (!user) return res.status(404).json({ message: 'User not found' });
-      res.json(user);
+      const updated = await usersService.updateUser(req.params.id, req.body);
+      res.json({ message: 'User updated', updated });
     } catch (err) {
-      res.status(500).json({ message: 'Error fetching user', error: err.message });
+      res.status(400).json({ error: err.message });
     }
-  }
+  },
 
-  static async updateUser(req, res) {
+  delete: async (req, res) => {
     try {
-      const user = await UserService.updateUser(req.params.id, req.body);
-      if (!user) return res.status(404).json({ message: 'User not found' });
-      res.json({ message: 'User updated', user });
-    } catch (err) {
-      res.status(500).json({ message: 'Error updating user', error: err.message });
-    }
-  }
-
-  static async deleteUser(req, res) {
-    try {
-      const success = await UserService.deleteUser(req.params.id);
-      if (!success) return res.status(404).json({ message: 'User not found' });
+      await usersService.deleteUser(req.params.id);
       res.json({ message: 'User deleted' });
     } catch (err) {
-      res.status(500).json({ message: 'Error deleting user', error: err.message });
+      res.status(400).json({ error: err.message });
     }
   }
-}
-
-module.exports = UsersController;
+};
