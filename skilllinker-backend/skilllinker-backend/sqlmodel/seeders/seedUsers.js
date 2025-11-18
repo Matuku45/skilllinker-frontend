@@ -23,7 +23,9 @@ const sequelize = new Sequelize(
 const User = sequelize.define('User', {
   username: { type: DataTypes.STRING, allowNull: false, unique: true },
   email: { type: DataTypes.STRING, allowNull: false, unique: true },
-  password: { type: DataTypes.STRING, allowNull: false }
+  password: { type: DataTypes.STRING, allowNull: false },
+  phone: { type: DataTypes.STRING, allowNull: true },         // new phone field
+  verified: { type: DataTypes.BOOLEAN, defaultValue: false } // new verified field
 }, {
   tableName: 'users',
   timestamps: true
@@ -44,9 +46,9 @@ async function runCRUD() {
 
     // ----- CREATE -----
     const usersData = [
-      { username: 'alice', email: 'alice@example.com', password: 'password1' },
-      { username: 'bob', email: 'bob@example.com', password: 'password2' },
-      { username: 'charlie', email: 'charlie@example.com', password: 'password3' }
+      { username: 'alice', email: 'alice@example.com', password: 'password1', phone: '1234567890', verified: true },
+      { username: 'bob', email: 'bob@example.com', password: 'password2', phone: '2345678901', verified: false },
+      { username: 'charlie', email: 'charlie@example.com', password: 'password3', phone: '3456789012', verified: false }
     ];
 
     for (const u of usersData) {
@@ -56,13 +58,14 @@ async function runCRUD() {
     console.log('✅ Users created');
 
     // ----- READ -----
-    const allUsers = await User.findAll({ raw: true });
+    let allUsers = await User.findAll({ raw: true });
     console.log('👀 All Users:', allUsers);
 
     // ----- UPDATE -----
     const bob = await User.findOne({ where: { username: 'bob' } });
     if (bob) {
       bob.email = 'bob.new@example.com';
+      bob.verified = true; // toggle verified
       await bob.save();
       console.log('✏️ Bob updated:', bob.get({ plain: true }));
     }
@@ -75,8 +78,20 @@ async function runCRUD() {
     }
 
     // ----- READ AFTER DELETE -----
-    const finalUsers = await User.findAll({ raw: true });
-    console.log('👀 Users after CRUD:', finalUsers);
+    allUsers = await User.findAll({ raw: true });
+    console.log('👀 Users after CRUD:', allUsers);
+
+    // ----- TOGGLE VERIFIED -----
+    async function toggleVerified(username) {
+      const user = await User.findOne({ where: { username } });
+      if (!user) return console.log(`User ${username} not found`);
+      user.verified = !user.verified;
+      await user.save();
+      console.log(`🔄 ${username} verified toggled to:`, user.verified);
+    }
+
+    // Example toggle
+    await toggleVerified('alice');
 
     process.exit(0);
   } catch (err) {
