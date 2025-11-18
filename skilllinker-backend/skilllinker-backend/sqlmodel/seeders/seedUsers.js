@@ -7,12 +7,13 @@ const bcrypt = require('bcrypt');
 // 1. Initialize Sequelize
 // -----------------------
 const sequelize = new Sequelize(
-  process.env.DB_NAME || 'skilllinker_db',
-  process.env.DB_USER || 'root',
-  process.env.DB_PASSWORD || '',
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: process.env.DB_HOST || 'localhost',
-    dialect: process.env.DB_DIALECT || 'mysql', // change to 'postgres' if using Postgres
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 3306,
+    dialect: 'mysql', // using MySQL
     logging: false
   }
 );
@@ -45,7 +46,11 @@ const User = sequelize.define('User', {
 // -----------------------
 async function seedUsers() {
   try {
-    // Force sync: drops table if exists, then creates new
+    // Test database connection
+    await sequelize.authenticate();
+    console.log('✅ Database connection OK');
+
+    // Force sync: drops table if exists
     await sequelize.sync({ force: true });
 
     const users = [
