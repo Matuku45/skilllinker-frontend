@@ -29,6 +29,14 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  verified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
   userType: {
     type: DataTypes.ENUM('assessor', 'moderator', 'sdp'),
     allowNull: false
