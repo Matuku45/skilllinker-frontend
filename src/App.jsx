@@ -27,7 +27,7 @@ import Profile from './pages/Assessor_Moderator_Dashboard/Profile';
 
 // Dashboard Pages
 import ModeratorAssessorDashboard from './pages/Assessor_Moderator_Dashboard/Moderator_Assessor_Dashboard';
-import SDPDashboard from './pages/SDP_Dashboard/SDP_Dashboard';
+import SDS_Dashboard from './pages/Skill_Development_Provider_Dashboard/SDS_Dashboard';
 import AdminDashboard from './pages/Admin_Dashboard/Admin_Dashboard';
 
 // Components
