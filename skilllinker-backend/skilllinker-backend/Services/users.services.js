@@ -1,4 +1,5 @@
-// Services/users.services.js
+
+
 const { User } = require('../sqlmodel/models'); // ✅ correct
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -6,9 +7,17 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
 
 module.exports = {
-  createUser: async (data) => {
-    return await User.create(data); // works now
-  },
+createUser: async (data) => {
+  // Default 'active' based on userType
+  if (data.userType === 'assessor') {
+    data.active = data.active !== undefined ? data.active : false;
+  } else {
+    data.active = data.active !== undefined ? data.active : true;
+  }
+
+  return await User.create(data);
+},
+
 
   getAllUsers: async () => {
     return await User.findAll({ attributes: { exclude: ['password'] } });
@@ -49,7 +58,7 @@ module.exports = {
         firstName: user.firstName,
         lastName: user.lastName
       },
-      token
+      token,
     };
   }
 };
