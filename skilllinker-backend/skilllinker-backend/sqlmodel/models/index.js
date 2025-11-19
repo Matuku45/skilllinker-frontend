@@ -7,10 +7,10 @@ const sequelize = require(path.join(__dirname, '..', '..', 'config', 'database')
 // Function-style models
 const User = require('./User')(sequelize, Sequelize.DataTypes);
 const Job = require('./Job')(sequelize, Sequelize.DataTypes);
+const Message = require('./Message')(sequelize, Sequelize.DataTypes); // function-style
 
 // Class-style models
-const Application = require('./Application');
-const Message = require('./Message')(sequelize, Sequelize.DataTypes); // if function-style
+const Application = require('./Application'); // class-style
 
 // Associations
 User.hasMany(Application, { foreignKey: 'userId' });

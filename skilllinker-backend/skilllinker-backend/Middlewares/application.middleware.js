@@ -1,6 +1,3 @@
-// Middlewares/application.middleware.js
-
-// Basic validation middleware
 function validateApplication(req, res, next) {
   const { jobId, userId } = req.body;
   if (!jobId || !userId) {
@@ -9,4 +6,4 @@ function validateApplication(req, res, next) {
   next();
 }
 
-module.exports = { validateApplication };
+module.exports = validateApplication; // export directly
