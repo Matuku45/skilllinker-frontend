@@ -1,3 +1,4 @@
+// application.middleware.js
 function validateApplication(req, res, next) {
   const { jobId, userId } = req.body;
   if (!jobId || !userId) {
@@ -6,4 +7,4 @@ function validateApplication(req, res, next) {
   next();
 }
 
-module.exports = validateApplication; // export directly
+module.exports = { validateApplication }; // now it’s an object
