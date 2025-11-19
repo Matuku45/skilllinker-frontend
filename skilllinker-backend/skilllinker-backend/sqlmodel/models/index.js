@@ -2,17 +2,26 @@
 const path = require('path');
 const Sequelize = require('sequelize');
 
-// import your database config
+// Import your database config
 const sequelize = require(path.join(__dirname, '..', '..', 'config', 'database'));
 
-// Import each model definition:
+// Import models using function-style
 const User = require('./User')(sequelize, Sequelize.DataTypes);
 const Job = require('./Job')(sequelize, Sequelize.DataTypes);
+const Application = require('./Application')(sequelize, Sequelize.DataTypes); // if you have Application model
 
-// (If you have associations, define them here, e.g. User.hasMany(Job) etc.)
+// Optional: Define associations here (avoid circular dependencies)
+User.hasMany(Application, { foreignKey: 'userId' });
+Application.belongsTo(User, { foreignKey: 'userId' });
 
+Job.hasMany(Application, { foreignKey: 'jobId' });
+Application.belongsTo(Job, { foreignKey: 'jobId' });
+
+// Export models and sequelize instance
 module.exports = {
   sequelize,
+  Sequelize,
   User,
-  Job
+  Job,
+  Application
 };
