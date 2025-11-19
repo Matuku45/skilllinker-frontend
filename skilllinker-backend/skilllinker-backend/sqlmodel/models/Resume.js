@@ -1,4 +1,3 @@
-// sqlmodel/models/Resume.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 const User = require('./User');
@@ -8,6 +7,15 @@ const Resume = sequelize.define('Resume', {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
+  },
+  userId: { // explicit foreign key
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id'
+    },
+    onDelete: 'CASCADE'
   },
   data: {
     type: DataTypes.BLOB('long'),
@@ -30,7 +38,7 @@ const Resume = sequelize.define('Resume', {
       }
     }
   },
-  description: {  // optional extra field for additional info
+  description: {
     type: DataTypes.STRING,
     allowNull: true
   }

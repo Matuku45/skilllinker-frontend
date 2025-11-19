@@ -2,10 +2,9 @@
 const express = require('express');
 const router = express.Router();
 const ApplicationController = require('../Controllers/application.controller');
-const { validateApplication } = require('../Middlewares/application.middleware');
 
 // Create a new application
-router.post('/', validateApplication, ApplicationController.createApplication);
+router.post('/', ApplicationController.createApplication);
 
 // Get all applications
 router.get('/', ApplicationController.getAllApplications);
