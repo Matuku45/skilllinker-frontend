@@ -1,4 +1,5 @@
-const User = require('../sqlmodel/models/User');
+// Services/users.services.js
+const { User } = require('../sqlmodel/models'); // ✅ correct
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -6,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
 
 module.exports = {
   createUser: async (data) => {
-    return await User.create(data);
+    return await User.create(data); // works now
   },
 
   getAllUsers: async () => {
@@ -35,7 +36,20 @@ module.exports = {
     const match = await bcrypt.compare(password, user.password);
     if (!match) throw new Error('Invalid email or password');
 
-    const token = jwt.sign({ id: user.id, email: user.email, userType: user.userType }, JWT_SECRET, { expiresIn: '1h' });
-    return { user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }, token };
+    const token = jwt.sign(
+      { id: user.id, email: user.email, userType: user.userType },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      },
+      token
+    };
   }
 };
