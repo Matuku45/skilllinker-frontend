@@ -1,29 +1,36 @@
-// Application.js
-const { DataTypes } = require('sequelize');
+// sqlmodel/models/Application.js
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
-const JobFactory = require('./Job');
-const UserFactory = require('./User');
 
-const Job = JobFactory(sequelize, DataTypes);
-const User = UserFactory(sequelize, DataTypes);
+class Application extends Model {}
 
-// define Application model
-const Application = sequelize.define('Application', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  jobId: { type: DataTypes.INTEGER, allowNull: false, references: { model: Job, key: 'id' } },
-  userId: { type: DataTypes.INTEGER, allowNull: false, references: { model: User, key: 'id' } },
-  applicationDate: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-  status: { type: DataTypes.ENUM('applied', 'accepted', 'rejected'), defaultValue: 'applied' }
+Application.init({
+  id: { 
+    type: DataTypes.INTEGER, 
+    primaryKey: true, 
+    autoIncrement: true 
+  },
+  jobId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false
+  },
+  userId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false
+  },
+  applicationDate: { 
+    type: DataTypes.DATE, 
+    defaultValue: DataTypes.NOW 
+  },
+  status: { 
+    type: DataTypes.ENUM('applied', 'accepted', 'rejected'), 
+    defaultValue: 'applied' 
+  }
 }, {
+  sequelize,
+  modelName: 'Application',
   tableName: 'applications',
   timestamps: true
 });
-
-// associations
-Job.hasMany(Application, { foreignKey: 'jobId' });
-Application.belongsTo(Job, { foreignKey: 'jobId' });
-
-User.hasMany(Application, { foreignKey: 'userId' });
-Application.belongsTo(User, { foreignKey: 'userId' });
 
 module.exports = Application;
