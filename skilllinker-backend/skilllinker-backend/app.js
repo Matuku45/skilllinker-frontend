@@ -4,10 +4,12 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+// Routers
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users.routes');
 var jobRouter = require('./routes/job.routes');
 const paymentRouter = require('./routes/payment.routes');
+const resumeRouter = require('./routes/resume.routes'); // <-- add resume routes
 
 var app = express();
 
@@ -21,11 +23,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// routers with /api prefix
-app.use('/api', indexRouter);       // index routes if needed
+// Routers with /api prefix
+app.use('/api', indexRouter);        // optional index routes
 app.use('/api/users', usersRouter);
 app.use('/api/jobs', jobRouter);
 app.use('/api/payments', paymentRouter);
+app.use('/api/resumes', resumeRouter); // <-- mount resume router here
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
