@@ -25,10 +25,14 @@ const Resume = sequelize.define('Resume', {
     allowNull: false,
     validate: {
       isIn: {
-        args: [['image/jpeg', 'image/png', 'image/gif', 'image/webp']], // allowed image MIME types
-        msg: 'Only image files are allowed (jpeg, png, gif, webp)'
+        args: [['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf']], 
+        msg: 'Only text or document files (txt, pdf, doc, docx, rtf) are allowed'
       }
     }
+  },
+  description: {  // optional extra field for additional info
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   tableName: 'resumes',
