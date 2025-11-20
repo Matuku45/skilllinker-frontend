@@ -1,22 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { mockJobs } from '../../data/mockData'; // Removed getApplicantsForJob
-import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaUsers, FaCheck } from 'react-icons/fa';
+import { useAssessor } from '../../contexts/AssessorContext';
+import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaCheck } from 'react-icons/fa';
 import Profile from './Profile';
 
 const ModeratorAssessorDashboard = () => {
   const { currentUser, logout } = useAuth();
-  const [jobs, setJobs] = useState([]);
+  const { jobs, applications, loadingJobs, loadingApplications, fetchJobs } = useAssessor();
   const [activeTab, setActiveTab] = useState('available');
+  const [filteredJobs, setFilteredJobs] = useState([]);
 
+  // Filter jobs based on active tab
   useEffect(() => {
-    const filteredJobs = mockJobs.filter(job => {
-      if (activeTab === 'available') return job.status === 'open';
-      if (activeTab === 'assigned') return job.assignedTo?.includes(currentUser.id);
-      return false;
-    });
-    setJobs(filteredJobs);
-  }, [activeTab, currentUser.id]);
+    if (activeTab === 'available') {
+      setFilteredJobs(jobs.filter(job => job.status === 'open'));
+    } else if (activeTab === 'assigned') {
+      setFilteredJobs(jobs.filter(job => job.assignedTo?.includes(currentUser.id)));
+    } else {
+      setFilteredJobs([]);
+    }
+  }, [activeTab, jobs, currentUser.id]);
+
+  // Optionally refresh jobs when tab changes
+  useEffect(() => {
+    if (currentUser?.token) {
+      fetchJobs();
+    }
+  }, [currentUser?.token, fetchJobs]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -74,70 +84,76 @@ const ModeratorAssessorDashboard = () => {
 
         {/* Jobs List */}
         {activeTab !== 'profile' && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {jobs.map(job => (
-              <div key={job.id} className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900">{job.title}</h3>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      job.status === 'open' ? 'bg-green-100 text-green-800' :
-                      job.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {job.status}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm text-gray-600">{job.description}</p>
+          <>
+            {(loadingJobs || loadingApplications) ? (
+              <div className="text-center py-12 col-span-full text-gray-500">Loading...</div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredJobs.map(job => (
+                  <div key={job.id} className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-medium text-gray-900">{job.title}</h3>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          job.status === 'open' ? 'bg-green-100 text-green-800' :
+                          job.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {job.status}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm text-gray-600">{job.description}</p>
 
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FaBriefcase className="mr-2" />
-                      {job.sdpName}
+                      <div className="mt-4 space-y-2">
+                        <div className="flex items-center text-sm text-gray-500">
+                          <FaBriefcase className="mr-2" />
+                          {job.sdpName}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <FaMapMarkerAlt className="mr-2" />
+                          {job.location}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <FaCalendarAlt className="mr-2" />
+                          Deadline: {new Date(job.deadline).toLocaleDateString()}
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <div className="text-sm font-medium text-gray-900 mb-2">Required Qualifications:</div>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          {job.requiredQualifications.map((qual, index) => (
+                            <li key={index} className="flex items-center">
+                              <FaCheck className="mr-2 text-green-500" />
+                              {qual}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="mt-6 flex items-center justify-between">
+                        <span className="text-lg font-bold text-green-600">R{job.budget.toLocaleString()}</span>
+                        {activeTab === 'assigned' && (
+                          <span className="text-green-600 font-medium">Assigned to you</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FaMapMarkerAlt className="mr-2" />
-                      {job.location}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FaCalendarAlt className="mr-2" />
-                      Deadline: {new Date(job.deadline).toLocaleDateString()}
-                    </div>
                   </div>
+                ))}
 
-                  <div className="mt-4">
-                    <div className="text-sm font-medium text-gray-900 mb-2">Required Qualifications:</div>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      {job.requiredQualifications.map((qual, index) => (
-                        <li key={index} className="flex items-center">
-                          <FaCheck className="mr-2 text-green-500" />
-                          {qual}
-                        </li>
-                      ))}
-                    </ul>
+                {filteredJobs.length === 0 && (
+                  <div className="text-center py-12 col-span-full">
+                    <FaBriefcase className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No jobs found</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {activeTab === 'available' ? 'No available jobs at the moment.' :
+                       'No jobs assigned to you yet.'}
+                    </p>
                   </div>
-
-                  <div className="mt-6 flex items-center justify-between">
-                    <span className="text-lg font-bold text-green-600">R{job.budget.toLocaleString()}</span>
-                    {activeTab === 'assigned' && (
-                      <span className="text-green-600 font-medium">Assigned to you</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {jobs.length === 0 && (
-              <div className="text-center py-12 col-span-full">
-                <FaBriefcase className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No jobs found</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {activeTab === 'available' ? 'No available jobs at the moment.' :
-                   'No jobs assigned to you yet.'}
-                </p>
+                )}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>
