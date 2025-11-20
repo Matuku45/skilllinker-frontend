@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUsersAPI, updateUserAPI } from '../../contexts/AdminContext';
+import axios from 'axios';
+
+import { FaStar } from 'react-icons/fa';
+
 import { 
   FaUsers, 
   FaBriefcase, 
@@ -16,60 +20,63 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('users');
   const [selectedUser, setSelectedUser] = useState(null);
   const [users, setUsers] = useState([]);
-  const [jobs, setJobs] = useState(() => {
-    const storedJobs = localStorage.getItem('skilllinker_jobs');
-    return storedJobs ? JSON.parse(storedJobs) : [];
-  });
+  const [jobs, setJobs] = useState([]);
 
-  // Fetch users from API
+  // Fetch users
   const fetchUsers = async () => {
-    const data = await getUsersAPI();
-    setUsers(data);
+    try {
+      const data = await getUsersAPI();
+      setUsers(data);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+    }
+  };
+
+  // Fetch jobs from API
+  const fetchJobs = async () => {
+    try {
+      const res = await axios.get('http://localhost:3000/api/jobs');
+      setJobs(res.data);
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+    }
   };
 
   useEffect(() => {
     fetchUsers();
+    fetchJobs();
   }, []);
 
-  // Persist jobs
-  useEffect(() => {
-    localStorage.setItem('skilllinker_jobs', JSON.stringify(jobs));
-  }, [jobs]);
-
-  // Update user and refresh list to auto-update stats
-  const updateUserAndRefresh = async (userId, updatedFields) => {
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-    const updated = { ...user, ...updatedFields };
-    const result = await updateUserAPI(userId, updated);
+  // Update user and refresh stats
+// ✅ Only send fields that need updating
+const updateUserAndRefresh = async (userId, updatedFields) => {
+  try {
+    // Send only updated fields to the backend
+    const result = await updateUserAPI(userId, updatedFields);
     if (result) {
-      // Refresh the full users list to update stats dynamically
-      fetchUsers();
+      fetchUsers(); // refresh users after update
+    }
+  } catch (err) {
+    console.error('Error updating user:', err);
+  }
+};
+
+const handleVerifyActivateUser = (userId) => updateUserAndRefresh(userId, { verified: true, active: true });
+const handleRejectUser = (userId) => updateUserAndRefresh(userId, { verified: false, active: false });
+
+  const handleActivateUser = (userId) => updateUserAndRefresh(userId, { active: true });
+  const handleDeactivateUser = (userId) => updateUserAndRefresh(userId, { active: false });
+
+  const handleDeleteJob = async (jobId) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/jobs/${jobId}`);
+      fetchJobs(); // refresh jobs after deletion
+    } catch (err) {
+      console.error('Error deleting job:', err);
     }
   };
 
-  const handleVerifyActivateUser = (userId) => {
-    updateUserAndRefresh(userId, { verified: true, active: true });
-  };
-
-  const handleRejectUser = (userId) => {
-    updateUserAndRefresh(userId, { verified: false, active: false });
-  };
-
-  const handleActivateUser = (userId) => {
-    updateUserAndRefresh(userId, { active: true });
-  };
-
-  const handleDeactivateUser = (userId) => {
-    updateUserAndRefresh(userId, { active: false });
-  };
-
-  const handleDeleteJob = (jobId) => {
-    const updatedJobs = jobs.filter(job => job.id !== jobId);
-    setJobs(updatedJobs);
-  };
-
-  // Filtered and derived data for stats
+  // Stats
   const filteredUsers = Array.isArray(users) ? users.filter(u => u.userType !== 'admin') : [];
   const pendingUsers = filteredUsers.filter(u => !u.verified);
   const verifiedUsers = filteredUsers.filter(u => u.verified);
@@ -107,22 +114,42 @@ const AdminDashboard = () => {
           <Card icon={<FaBriefcase className="h-6 w-6 text-blue-400" />} title="Total Jobs" value={totalJobs} />
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
-            {['users', 'jobs'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab === 'users' ? 'User Management' : 'Job Management'}
-              </button>
-            ))}
-          </nav>
-        </div>
+  {/* Tabs */}
+<div className="border-b border-gray-200 mb-6">
+  <nav className="-mb-px flex space-x-8">
+    {['users', 'jobs', 'profile'].map(tab => (
+      <button
+        key={tab}
+        onClick={() => setActiveTab(tab)}
+        className={`py-2 px-1 border-b-2 font-medium text-sm ${
+          activeTab === tab
+            ? 'border-blue-500 text-blue-600'
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+        }`}
+      >
+        {tab === 'users' ? 'User Management' :
+         tab === 'jobs' ? 'Job Management' :
+         'Profile'}
+      </button>
+    ))}
+  </nav>
+</div>
+
+{/* Profile Tab */}
+{activeTab === 'profile' && (
+  <div className="bg-white shadow overflow-hidden sm:rounded-md p-6 max-w-md mx-auto">
+    <h2 className="text-xl font-semibold mb-4">My Profile</h2>
+    <div className="space-y-3">
+      <Detail label="First Name" value={currentUser.firstName} />
+      <Detail label="Last Name" value={currentUser.lastName} />
+      <Detail label="Email" value={currentUser.email} />
+      <Detail label="User Type" value={currentUser.userType} />
+      {currentUser.location && <Detail label="Location" value={currentUser.location} />}
+      {currentUser.companyName && <Detail label="Company" value={currentUser.companyName} />}
+    </div>
+  </div>
+)}
+
 
         {/* User Management */}
         {activeTab === 'users' && (
@@ -176,42 +203,44 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Job Management */}
-        {activeTab === 'jobs' && (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {jobs.map(job => (
-                <li key={job.id}>
-                  <div className="px-4 py-4 sm:px-6 flex justify-between items-center">
-                    <div className="flex items-center">
-                      <FaBriefcase className="h-6 w-6 text-gray-400" />
-                      <div className="ml-4">
-                        <div className="flex items-center">
-                          <p className="text-sm font-medium text-gray-900">{job.title}</p>
-                          <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${
-                            job.status === 'open' ? 'bg-green-100 text-green-800' :
-                            job.status === 'in-progress' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                          }`}>{job.status}</span>
-                        </div>
-                        <p className="text-sm text-gray-500">{job.sdpName}</p>
-                        <p className="text-sm text-gray-500">{job.location}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-medium text-gray-900">R{job.budget?.toLocaleString()}</span>
-                      <button onClick={() => handleDeleteJob(job.id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm flex items-center">
-                        <FaTimes className="mr-1" /> Delete
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+{/* Job Management - View Only */}
+{activeTab === 'jobs' && (
+  <div className="bg-white shadow-md overflow-hidden sm:rounded-lg">
+    <ul className="divide-y divide-gray-200">
+      {jobs.map(job => (
+        <li key={job.id}>
+          <div className="px-4 py-4 sm:px-6 flex justify-between items-center">
+            <div className="flex items-center">
+              {/* Star icon instead of briefcase */}
+              <FaStar className="h-6 w-6 text-yellow-400" />
+              <div className="ml-4">
+                <div className="flex items-center space-x-2">
+                  <p className="text-sm font-semibold text-gray-900">{job.title}</p>
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    job.status === 'open' ? 'bg-green-100 text-green-800' :
+                    job.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {job.status}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500">{job.sdpName}</p>
+                <p className="text-sm text-gray-500">{job.location}</p>
+              </div>
+            </div>
+            <div className="text-sm font-medium text-gray-900">
+              R{job.budget?.toLocaleString()}
+            </div>
           </div>
-        )}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
       </div>
 
-      {/* User Details Modal */}
+      {/* User Modal */}
       {selectedUser && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-start z-50 pt-20">
           <div className="bg-white p-5 rounded-md shadow-lg w-96">
@@ -236,7 +265,7 @@ const AdminDashboard = () => {
   );
 };
 
-// Card Component
+// Card
 const Card = ({ icon, title, value }) => (
   <div className="bg-white overflow-hidden shadow rounded-lg">
     <div className="p-5 flex items-center">
@@ -251,7 +280,7 @@ const Card = ({ icon, title, value }) => (
   </div>
 );
 
-// Detail Component
+// Detail
 const Detail = ({ label, value }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700">{label}</label>
