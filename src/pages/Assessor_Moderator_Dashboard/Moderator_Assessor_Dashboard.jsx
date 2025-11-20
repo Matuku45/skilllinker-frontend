@@ -1,46 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { mockJobs, getApplicantsForJob } from '../../data/mockData';
+import { mockJobs } from '../../data/mockData'; // Removed getApplicantsForJob
 import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaUsers, FaCheck } from 'react-icons/fa';
 import Profile from './Profile';
 
 const ModeratorAssessorDashboard = () => {
-  const { currentUser, resume, logout } = useAuth();
+  const { currentUser, logout } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [activeTab, setActiveTab] = useState('available');
 
-  // Update jobs list whenever the tab or user changes
   useEffect(() => {
     const filteredJobs = mockJobs.filter(job => {
       if (activeTab === 'available') return job.status === 'open';
-      if (activeTab === 'applied') return job.applicants.includes(currentUser.id);
       if (activeTab === 'assigned') return job.assignedTo?.includes(currentUser.id);
       return false;
     });
     setJobs(filteredJobs);
   }, [activeTab, currentUser.id]);
-
-  const handleApply = (jobId) => {
-    if (!resume) {
-      alert("Please upload your resume in your profile before applying.");
-      return;
-    }
-
-    const job = mockJobs.find(j => j.id === jobId);
-    if (job && !job.applicants.includes(currentUser.id)) {
-      job.applicants.push(currentUser.id);
-      setJobs(prev => prev.map(j => j.id === jobId ? job : j)); // trigger re-render
-      alert("Application submitted successfully!");
-    }
-  };
-
-  const handleWithdraw = (jobId) => {
-    const job = mockJobs.find(j => j.id === jobId);
-    if (job) {
-      job.applicants = job.applicants.filter(id => id !== currentUser.id);
-      setJobs(prev => prev.map(j => j.id === jobId ? job : j)); // trigger re-render
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -75,7 +51,6 @@ const ModeratorAssessorDashboard = () => {
           <nav className="-mb-px flex space-x-8">
             {[
               { id: 'available', name: 'Available Jobs' },
-              { id: 'applied', name: 'Applied Jobs' },
               { id: 'assigned', name: 'Assigned Jobs' },
               { id: 'profile', name: 'Profile' }
             ].map(tab => (
@@ -128,10 +103,6 @@ const ModeratorAssessorDashboard = () => {
                       <FaCalendarAlt className="mr-2" />
                       Deadline: {new Date(job.deadline).toLocaleDateString()}
                     </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FaUsers className="mr-2" />
-                      {getApplicantsForJob(job.id).length} applicants
-                    </div>
                   </div>
 
                   <div className="mt-4">
@@ -148,22 +119,6 @@ const ModeratorAssessorDashboard = () => {
 
                   <div className="mt-6 flex items-center justify-between">
                     <span className="text-lg font-bold text-green-600">R{job.budget.toLocaleString()}</span>
-                    {activeTab === 'available' && (
-                      <button
-                        onClick={() => handleApply(job.id)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                      >
-                        Apply Now
-                      </button>
-                    )}
-                    {activeTab === 'applied' && (
-                      <button
-                        onClick={() => handleWithdraw(job.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                      >
-                        Withdraw Application
-                      </button>
-                    )}
                     {activeTab === 'assigned' && (
                       <span className="text-green-600 font-medium">Assigned to you</span>
                     )}
@@ -178,7 +133,6 @@ const ModeratorAssessorDashboard = () => {
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No jobs found</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   {activeTab === 'available' ? 'No available jobs at the moment.' :
-                   activeTab === 'applied' ? "You haven't applied to any jobs yet." :
                    'No jobs assigned to you yet.'}
                 </p>
               </div>

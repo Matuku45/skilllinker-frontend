@@ -1,49 +1,36 @@
-
-
-const { User } = require('../sqlmodel/models'); // ✅ correct
-const bcrypt = require('bcrypt');
+const { User } = require('../sqlmodel/models');
 const jwt = require('jsonwebtoken');
-
 const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
 
 module.exports = {
-createUser: async (data) => {
-  // Default 'active' based on userType
-  if (data.userType === 'assessor') {
-    data.active = data.active !== undefined ? data.active : false;
-  } else {
-    data.active = data.active !== undefined ? data.active : true;
-  }
+  createUser: async (data) => {
+    const required = ['firstName', 'lastName', 'email', 'password', 'userType'];
+    for (const field of required) {
+      if (!data[field]) throw new Error(`Missing required field: ${field}`);
+    }
 
-  return await User.create(data);
-},
+    const userPayload = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phone: data.phone || null,
+      password: data.password, 
+      userType: data.userType,
+      verified: data.verified || false,
+      agreeToTerms: data.agreeToTerms || false
+      // ❌ active removed
+    };
 
-
-  getAllUsers: async () => {
-    return await User.findAll({ attributes: { exclude: ['password'] } });
-  },
-
-  getUserByEmail: async (email) => {
-    return await User.findOne({ where: { email } });
-  },
-
-  updateUser: async (id, data) => {
-    const user = await User.findByPk(id);
-    if (!user) throw new Error('User not found');
-    return await user.update(data);
-  },
-
-  deleteUser: async (id) => {
-    const user = await User.findByPk(id);
-    if (!user) throw new Error('User not found');
-    return await user.destroy();
+    return await User.create(userPayload);
   },
 
   login: async (email, password) => {
     const user = await User.findOne({ where: { email } });
     if (!user) throw new Error('Invalid email or password');
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) throw new Error('Invalid email or password');
+
+    if (password !== user.password) {
+      throw new Error('Invalid email or password');
+    }
 
     const token = jwt.sign(
       { id: user.id, email: user.email, userType: user.userType },
@@ -56,9 +43,28 @@ createUser: async (data) => {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
-        lastName: user.lastName
+        lastName: user.lastName,
+        userType: user.userType
       },
-      token,
+      token
     };
+  },
+
+  getAllUsers: async () => {
+    return await User.findAll({ attributes: { exclude: ['password'] } });
+  },
+
+  updateUser: async (id, data) => {
+    const user = await User.findByPk(id);
+    if (!user) throw new Error('User not found');
+
+    return await user.update(data);
+  },
+
+  deleteUser: async (id) => {
+    const user = await User.findByPk(id);
+    if (!user) throw new Error('User not found');
+
+    return await user.destroy();
   }
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { addJob } from '../../utils/localStorage';
 
 const PostJob = ({ onJobPosted }) => {
   const { currentUser } = useAuth();
@@ -19,7 +20,6 @@ const PostJob = ({ onJobPosted }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newJob = {
-      id: Date.now(), // Simple ID generation
       title: formData.title,
       description: formData.description,
       sdpId: currentUser.id,
@@ -28,10 +28,11 @@ const PostJob = ({ onJobPosted }) => {
       budget: parseFloat(formData.budget),
       status: 'open',
       requiredQualifications: formData.requiredQualifications.split(',').map(q => q.trim()),
-      postedDate: new Date().toISOString().split('T')[0],
+      postedDate: new Date().toISOString(),
       deadline: formData.deadline,
       applicants: []
     };
+    addJob(newJob);
     onJobPosted(newJob);
     // Reset form
     setFormData({

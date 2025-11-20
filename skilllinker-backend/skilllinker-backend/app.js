@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+const cors = require('cors'); // <-- import cors
+
 // Routers
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users.routes');
@@ -14,6 +16,15 @@ var applicationRouter = require('./routes/application.routes');
 var messageRouter = require('./routes/message.routes');           
 
 var app = express();
+
+
+app.use(cors({
+  origin: 'http://localhost:5173', // React frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
 
 // View engine setup
 app.set('views', path.join(__dirname, 'views'));

@@ -1,148 +1,95 @@
-// Mock data for SkillLinker MVP
-
+// src/data/mockData.js
 export const mockUsers = [
   {
     id: 1,
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    password: "password", // Mock password for demo
-    userType: "assessor",
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@example.com',
+    password: 'password123',
+    phone: '123-456-7890',
     verified: true,
-    qualifications: ["SETA Registered Assessor"],
-    location: "Johannesburg",
-    createdAt: "2024-01-15"
+    userType: 'assessor',
+    active: false, // Default inactive for assessors
+    agreeToTerms: true,
   },
   {
     id: 2,
-    firstName: "Jane",
-    lastName: "Smith",
-    email: "jane.smith@example.com",
-    password: "password", // Mock password for demo
-    userType: "moderator",
+    firstName: 'Jane',
+    lastName: 'Smith',
+    email: 'jane.smith@example.com',
+    password: 'password123',
+    phone: '098-765-4321',
     verified: true,
-    qualifications: ["SETA Registered Moderator"],
-    location: "Cape Town",
-    createdAt: "2024-01-20"
+    userType: 'sdp',
+    active: true, // Active for SDP
+    agreeToTerms: true,
   },
   {
     id: 3,
-    firstName: "Skills",
-    lastName: "Provider",
-    email: "sdp@example.com",
-    password: "password", // Mock password for demo
-    userType: "sdp",
+    firstName: 'Admin',
+    lastName: 'User',
+    email: 'admin@example.com',
+    password: 'admin123',
+    phone: '111-222-3333',
     verified: true,
-    companyName: "Skills Development Co",
-    location: "Durban",
-    createdAt: "2024-01-10"
+    userType: 'admin',
+    active: true, // Active for admin
+    agreeToTerms: true,
   },
   {
     id: 4,
-    firstName: "Admin",
-    lastName: "User",
-    email: "admin@skilllinker.com",
-    password: "password", // Mock password for demo
-    userType: "admin",
+    firstName: 'Active',
+    lastName: 'Assessor',
+    email: 'active.assessor@example.com',
+    password: 'password123',
+    phone: '444-555-6666',
     verified: true,
-    createdAt: "2024-01-01"
+    userType: 'assessor',
+    active: true, // Active assessor
+    agreeToTerms: true,
   },
-  {
-    id: 5,
-    firstName: "Unverified",
-    lastName: "Assessor",
-    email: "unverified@example.com",
-    password: "password", // Mock password for demo
-    userType: "assessor",
-    verified: false,
-    qualifications: ["Pending Verification"],
-    location: "Pretoria",
-    createdAt: "2024-01-25"
-  }
 ];
 
 export const mockJobs = [
   {
     id: 1,
-    title: "Assessment Services for IT Certification",
-    description: "Need qualified assessors for IT certification assessments in Johannesburg area.",
-    sdpId: 3,
-    sdpName: "Skills Development Co",
-    location: "Johannesburg",
-    budget: 5000,
-    status: "open",
-    requiredQualifications: ["SETA Registered Assessor", "IT Certification"],
-    postedDate: "2024-01-20",
-    deadline: "2024-02-20",
-    applicants: [1]
+    title: 'Software Development Training',
+    description: 'Provide training on software development skills.',
+    sdpId: 2,
+    location: 'Johannesburg',
+    budget: 50000.00,
+    status: 'open',
+    requiredQualifications: ['JavaScript', 'React'],
+    postedDate: new Date().toISOString(),
+    deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
   },
   {
     id: 2,
-    title: "Moderation Services for Business Skills",
-    description: "Looking for experienced moderators for business skills training programs.",
-    sdpId: 3,
-    sdpName: "Skills Development Co",
-    location: "Cape Town",
-    budget: 3500,
-    status: "open",
-    requiredQualifications: ["SETA Registered Moderator", "Business Skills"],
-    postedDate: "2024-01-22",
-    deadline: "2024-02-15",
-    applicants: [2]
+    title: 'Data Analysis Workshop',
+    description: 'Conduct workshops on data analysis techniques.',
+    sdpId: 2,
+    location: 'Cape Town',
+    budget: 30000.00,
+    status: 'open',
+    requiredQualifications: ['Python', 'Pandas'],
+    postedDate: new Date().toISOString(),
+    deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
   },
-  {
-    id: 3,
-    title: "Assessment and Moderation Combo",
-    description: "Combined assessment and moderation services needed for manufacturing sector.",
-    sdpId: 3,
-    sdpName: "Skills Development Co",
-    location: "Durban",
-    budget: 8000,
-    status: "in-progress",
-    requiredQualifications: ["SETA Registered Assessor", "SETA Registered Moderator"],
-    postedDate: "2024-01-18",
-    deadline: "2024-03-01",
-    applicants: [1, 2],
-    assignedTo: [1, 2]
-  }
 ];
 
 export const mockMessages = [
   {
     id: 1,
-    fromUserId: 3,
-    toUserId: 1,
-    jobId: 1,
-    message: "Hi John, we're interested in your application for the IT assessment job.",
-    timestamp: "2024-01-21T10:00:00Z",
-    read: false
+    senderId: 1,
+    receiverId: 2,
+    content: 'Hello, I am interested in your job posting.',
+    timestamp: new Date().toISOString(),
   },
   {
     id: 2,
-    fromUserId: 1,
-    toUserId: 3,
-    jobId: 1,
-    message: "Thank you! I'd be happy to discuss the details.",
-    timestamp: "2024-01-21T11:30:00Z",
-    read: true
+    senderId: 2,
+    receiverId: 1,
+    content: 'Great! Please send your resume.',
+    timestamp: new Date().toISOString(),
   },
-  {
-    id: 3,
-    fromUserId: 3,
-    toUserId: 2,
-    jobId: 2,
-    message: "Jane, please review the attached documents for the moderation job.",
-    timestamp: "2024-01-23T09:15:00Z",
-    read: false
-  }
 ];
-
-// Helper functions
-export const getUserById = (id) => mockUsers.find(user => user.id === id);
-export const getJobById = (id) => mockJobs.find(job => job.id === id);
-export const getMessagesForUser = (userId) => mockMessages.filter(msg => msg.fromUserId === userId || msg.toUserId === userId);
-export const getJobsBySDP = (sdpId) => mockJobs.filter(job => job.sdpId === sdpId);
-export const getApplicantsForJob = (jobId) => {
-  const job = getJobById(jobId);
-  return job ? job.applicants.map(id => getUserById(id)) : [];
-};

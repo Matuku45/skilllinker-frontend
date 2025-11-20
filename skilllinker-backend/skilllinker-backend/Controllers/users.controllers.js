@@ -7,16 +7,10 @@ module.exports = {
       const user = await usersService.createUser(req.body);
       res.status(201).json({ message: 'User registered', user });
     } catch (err) {
-      // If it's a Sequelize validation error
       if (err instanceof ValidationError) {
-        const validationErrors = err.errors.map(e => ({
-          field: e.path,
-          message: e.message
-        }));
-        return res.status(400).json({ error: 'Validation error', details: validationErrors });
+        const errors = err.errors.map(e => ({ field: e.path, message: e.message }));
+        return res.status(400).json({ error: 'Validation error', details: errors });
       }
-
-      // Other errors
       res.status(400).json({ error: err.message });
     }
   },
@@ -45,13 +39,6 @@ module.exports = {
       const updated = await usersService.updateUser(req.params.id, req.body);
       res.json({ message: 'User updated', updated });
     } catch (err) {
-      if (err instanceof ValidationError) {
-        const validationErrors = err.errors.map(e => ({
-          field: e.path,
-          message: e.message
-        }));
-        return res.status(400).json({ error: 'Validation error', details: validationErrors });
-      }
       res.status(400).json({ error: err.message });
     }
   },

@@ -11,9 +11,10 @@ import {
 } from 'react-icons/fa';
 
 const AdminDashboard = () => {
-  const { currentUser, allUsers, updateUser, logout } = useAuth();
+  const { currentUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState(getUsers);
   const [jobs, setJobs] = useState(() => {
     const storedJobs = localStorage.getItem('skilllinker_jobs');
     return storedJobs ? JSON.parse(storedJobs) : [];
@@ -25,19 +26,31 @@ const AdminDashboard = () => {
   }, [jobs]);
 
   const handleVerifyUser = (userId) => {
-    const user = allUsers.find(u => u.id === userId);
+    const user = users.find(u => u.id === userId);
     if (user) {
       const updated = { ...user, verified: true };
-      updateUser(updated);
+      updateUser(userId, updated);
+      setUsers(getUsers());
     }
   };
 
   const handleRejectUser = (userId) => {
-    const user = allUsers.find(u => u.id === userId);
+    const user = users.find(u => u.id === userId);
     if (user) {
       const updated = { ...user, verified: false };
-      updateUser(updated);
+      updateUser(userId, updated);
+      setUsers(getUsers());
     }
+  };
+
+  const handleActivateUser = (userId) => {
+    activateUser(userId);
+    setUsers(getUsers());
+  };
+
+  const handleDeactivateUser = (userId) => {
+    deactivateUser(userId);
+    setUsers(getUsers());
   };
 
   const handleDeleteJob = (jobId) => {
@@ -45,7 +58,7 @@ const AdminDashboard = () => {
     setJobs(updatedJobs);
   };
 
-  const users = allUsers?.filter(u => u.userType !== 'admin') || [];
+  const filteredUsers = users?.filter(u => u.userType !== 'admin') || [];
   const pendingUsers = users.filter(u => !u.verified);
   const verifiedUsers = users.filter(u => u.verified);
   const totalJobs = jobs.length;
@@ -103,7 +116,7 @@ const AdminDashboard = () => {
         {activeTab === 'users' && (
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
-              {users.map(user => (
+              {filteredUsers.map(user => (
                 <li key={user.id}>
                   <div className="px-4 py-4 sm:px-6 flex justify-between items-center">
                     <div className="flex items-center">
@@ -132,6 +145,19 @@ const AdminDashboard = () => {
                           <button onClick={() => handleRejectUser(user.id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm flex items-center">
                             <FaTimes className="mr-1" /> Reject
                           </button>
+                        </>
+                      )}
+                      {user.userType === 'assessor' && (
+                        <>
+                          {user.active ? (
+                            <button onClick={() => handleDeactivateUser(user.id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm flex items-center">
+                              <FaUserMinus className="mr-1" /> Deactivate
+                            </button>
+                          ) : (
+                            <button onClick={() => handleActivateUser(user.id)} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm flex items-center">
+                              <FaUserPlus className="mr-1" /> Activate
+                            </button>
+                          )}
                         </>
                       )}
                       <button onClick={() => setSelectedUser(user)} className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm flex items-center">
