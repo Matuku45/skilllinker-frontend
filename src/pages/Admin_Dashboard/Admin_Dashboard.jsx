@@ -1,56 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { getUsersAPI, updateUserAPI } from '../../contexts/AdminContext';
 import { 
   FaUsers, 
   FaBriefcase, 
   FaCheck, 
   FaTimes, 
   FaEye, 
-  FaUserCheck, 
-  FaUserTimes 
+  FaUserMinus, 
+  FaUserPlus 
 } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const { currentUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
   const [selectedUser, setSelectedUser] = useState(null);
-  const [users, setUsers] = useState(getUsers);
+  const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState(() => {
     const storedJobs = localStorage.getItem('skilllinker_jobs');
     return storedJobs ? JSON.parse(storedJobs) : [];
   });
 
-  // Save jobs to localStorage whenever they change
+  // Fetch users from API
+  const fetchUsers = async () => {
+    const data = await getUsersAPI();
+    setUsers(data);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // Persist jobs
   useEffect(() => {
     localStorage.setItem('skilllinker_jobs', JSON.stringify(jobs));
   }, [jobs]);
 
-  const handleVerifyUser = (userId) => {
+  // Update user and refresh list to auto-update stats
+  const updateUserAndRefresh = async (userId, updatedFields) => {
     const user = users.find(u => u.id === userId);
-    if (user) {
-      const updated = { ...user, verified: true };
-      updateUser(userId, updated);
-      setUsers(getUsers());
+    if (!user) return;
+    const updated = { ...user, ...updatedFields };
+    const result = await updateUserAPI(userId, updated);
+    if (result) {
+      // Refresh the full users list to update stats dynamically
+      fetchUsers();
     }
+  };
+
+  const handleVerifyActivateUser = (userId) => {
+    updateUserAndRefresh(userId, { verified: true, active: true });
   };
 
   const handleRejectUser = (userId) => {
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      const updated = { ...user, verified: false };
-      updateUser(userId, updated);
-      setUsers(getUsers());
-    }
+    updateUserAndRefresh(userId, { verified: false, active: false });
   };
 
   const handleActivateUser = (userId) => {
-    activateUser(userId);
-    setUsers(getUsers());
+    updateUserAndRefresh(userId, { active: true });
   };
 
   const handleDeactivateUser = (userId) => {
-    deactivateUser(userId);
-    setUsers(getUsers());
+    updateUserAndRefresh(userId, { active: false });
   };
 
   const handleDeleteJob = (jobId) => {
@@ -58,9 +69,10 @@ const AdminDashboard = () => {
     setJobs(updatedJobs);
   };
 
-  const filteredUsers = users?.filter(u => u.userType !== 'admin') || [];
-  const pendingUsers = users.filter(u => !u.verified);
-  const verifiedUsers = users.filter(u => u.verified);
+  // Filtered and derived data for stats
+  const filteredUsers = Array.isArray(users) ? users.filter(u => u.userType !== 'admin') : [];
+  const pendingUsers = filteredUsers.filter(u => !u.verified);
+  const verifiedUsers = filteredUsers.filter(u => u.verified);
   const totalJobs = jobs.length;
   const openJobs = jobs.filter(job => job.status === 'open').length;
 
@@ -89,9 +101,9 @@ const AdminDashboard = () => {
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card icon={<FaUsers className="h-6 w-6 text-gray-400" />} title="Total Users" value={users.length} />
-          <Card icon={<FaUserCheck className="h-6 w-6 text-green-400" />} title="Verified Users" value={verifiedUsers.length} />
-          <Card icon={<FaUserTimes className="h-6 w-6 text-yellow-400" />} title="Pending Verification" value={pendingUsers.length} />
+          <Card icon={<FaUsers className="h-6 w-6 text-gray-400" />} title="Total Users" value={filteredUsers.length} />
+          <Card icon={<FaCheck className="h-6 w-6 text-green-400" />} title="Verified Users" value={verifiedUsers.length} />
+          <Card icon={<FaTimes className="h-6 w-6 text-yellow-400" />} title="Pending Verification" value={pendingUsers.length} />
           <Card icon={<FaBriefcase className="h-6 w-6 text-blue-400" />} title="Total Jobs" value={totalJobs} />
         </div>
 
@@ -112,7 +124,7 @@ const AdminDashboard = () => {
           </nav>
         </div>
 
-        {/* User Management Tab */}
+        {/* User Management */}
         {activeTab === 'users' && (
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
@@ -122,7 +134,7 @@ const AdminDashboard = () => {
                     <div className="flex items-center">
                       <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                         <span className="text-sm font-medium text-gray-700">
-                          {user.firstName[0]}{user.lastName[0]}
+                          {(user.firstName?.[0] || '') + (user.lastName?.[0] || '')}
                         </span>
                       </div>
                       <div className="ml-4">
@@ -138,27 +150,20 @@ const AdminDashboard = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       {!user.verified && (
-                        <>
-                          <button onClick={() => handleVerifyUser(user.id)} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm flex items-center">
-                            <FaCheck className="mr-1" /> Verify
-                          </button>
-                          <button onClick={() => handleRejectUser(user.id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm flex items-center">
-                            <FaTimes className="mr-1" /> Reject
-                          </button>
-                        </>
+                        <button
+                          onClick={() => handleVerifyActivateUser(user.id)}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm flex items-center"
+                        >
+                          <FaCheck className="mr-1" /> Verify / Activate
+                        </button>
                       )}
-                      {user.userType === 'assessor' && (
-                        <>
-                          {user.active ? (
-                            <button onClick={() => handleDeactivateUser(user.id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm flex items-center">
-                              <FaUserMinus className="mr-1" /> Deactivate
-                            </button>
-                          ) : (
-                            <button onClick={() => handleActivateUser(user.id)} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm flex items-center">
-                              <FaUserPlus className="mr-1" /> Activate
-                            </button>
-                          )}
-                        </>
+                      {user.verified && (
+                        <button
+                          onClick={() => handleRejectUser(user.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm flex items-center"
+                        >
+                          <FaTimes className="mr-1" /> Reject / Deactivate
+                        </button>
                       )}
                       <button onClick={() => setSelectedUser(user)} className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm flex items-center">
                         <FaEye className="mr-1" /> View
@@ -171,7 +176,7 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Job Management Tab */}
+        {/* Job Management */}
         {activeTab === 'jobs' && (
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
@@ -193,7 +198,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm font-medium text-gray-900">R{job.budget.toLocaleString()}</span>
+                      <span className="text-sm font-medium text-gray-900">R{job.budget?.toLocaleString()}</span>
                       <button onClick={() => handleDeleteJob(job.id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm flex items-center">
                         <FaTimes className="mr-1" /> Delete
                       </button>
@@ -231,7 +236,7 @@ const AdminDashboard = () => {
   );
 };
 
-// Reusable card component
+// Card Component
 const Card = ({ icon, title, value }) => (
   <div className="bg-white overflow-hidden shadow rounded-lg">
     <div className="p-5 flex items-center">
@@ -246,7 +251,7 @@ const Card = ({ icon, title, value }) => (
   </div>
 );
 
-// Reusable detail row for modal
+// Detail Component
 const Detail = ({ label, value }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700">{label}</label>
