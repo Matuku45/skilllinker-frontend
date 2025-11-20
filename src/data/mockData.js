@@ -50,6 +50,41 @@ export const mockUsers = [
   },
 ];
 
+
+// Get a job by its ID
+export function getJobById(id) {
+  return mockJobs.find(job => job.id === id);
+}
+
+// Get applicants for a job (mocking as empty for now, or you can filter mockUsers)
+
+
+export function getUserById(id) {
+  return mockUsers.find(user => user.id === id);
+}
+
+
+export function getJobsBySDP(sdpId) {
+  return mockJobs.filter(job => job.sdpId === sdpId);
+}
+
+
+
+export function getApplicantsForJob(jobId) {
+  // Assuming you want applicants from mockUsers where userType is 'assessor'
+  return mockUsers
+    .filter(user => user.userType === 'assessor' && user.active)
+    .map(user => ({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      location: 'Unknown', // Or pull from user object if available
+      verified: user.verified,
+      qualifications: ['JavaScript', 'React'], // Dummy data or pull from user
+    }));
+}
+
 export const mockJobs = [
   {
     id: 1,

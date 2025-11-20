@@ -1,110 +1,92 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { mockUsers } from '../data/mockData'; // Make sure mockUsers is exported from mockData.js
+import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 
-// Create Auth context
 const AuthContext = createContext();
 
-// Custom hook to use Auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
-// AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [resume, setResume] = useState(null); // Added for resume upload
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load stored user on initial render
+  const API_URL = "http://localhost:3000/api/users"; // ⬅️ Your actual backend base URL
+
+  // Load stored user on refresh
   useEffect(() => {
-    const storedUser = localStorage.getItem('skilllinker_user');
-    const storedResume = localStorage.getItem('skilllinker_resume');
+    const storedUser = localStorage.getItem("skilllinker_user");
     if (storedUser) {
       setCurrentUser(JSON.parse(storedUser));
-    }
-    if (storedResume) {
-      setResume(JSON.parse(storedResume));
     }
     setIsLoading(false);
   }, []);
 
-  // Mock login function
-  const login = async (email, password) => {
-    const user = mockUsers.find(u => u.email === email);
-    if (user && password === 'password') { // simple mock password
-      setCurrentUser(user);
-      localStorage.setItem('skilllinker_user', JSON.stringify(user));
-      return { success: true, user };
-    }
-    return { success: false, error: 'Invalid credentials' };
-  };
+  // ⭐ LOGIN using your real API
+const login = async (email, password) => {
+  try {
+    const res = await axios.post("http://localhost:3000/api/users/login", {
+      email,
+      password,
+    });
 
-  // Mock registration function
-  const register = async (userData) => {
-    const newUser = {
-      id: mockUsers.length + 1,
-      ...userData,
-      verified: false,
-      createdAt: new Date().toISOString().split('T')[0],
+    const { user, token } = res.data;
+
+    // Save user
+    setCurrentUser(user);                 // <-- REQUIRED!!
+    localStorage.setItem("skilllinker_user", JSON.stringify(user));
+    localStorage.setItem("skilllinker_token", token);
+
+    return { success: true, user };
+  } catch (err) {
+    return {
+      success: false,
+      error: err.response?.data?.error || "Login failed",
     };
-    mockUsers.push(newUser);
-    setCurrentUser(newUser);
-    localStorage.setItem('skilllinker_user', JSON.stringify(newUser));
-    return { success: true };
+  }
+};
+
+
+  // ⭐ REGISTER using your real API
+  const register = async (userData) => {
+    try {
+      const res = await axios.post(`${API_URL}/register`, userData);
+
+      const user = res.data.user;
+
+      setCurrentUser(user);
+      localStorage.setItem("skilllinker_user", JSON.stringify(user));
+
+      return { success: true, user };
+    } catch (err) {
+      return {
+        success: false,
+        error: err.response?.data?.message || "Registration failed",
+      };
+    }
   };
 
-  // Logout function
+  // ⭐ LOGOUT
   const logout = () => {
     setCurrentUser(null);
-    setResume(null);
-    localStorage.removeItem('skilllinker_user');
-    localStorage.removeItem('skilllinker_resume');
-  };
-
-  // Update user details
-  const updateUser = (updatedUser) => {
-    const index = mockUsers.findIndex(u => u.id === updatedUser.id);
-    if (index !== -1) {
-      mockUsers[index] = updatedUser;
-      setCurrentUser(updatedUser);
-      localStorage.setItem('skilllinker_user', JSON.stringify(updatedUser));
-    }
-  };
-
-  // Upload resume function
-  const uploadResume = (file) => {
-    setResume(file);
-    // Persist in localStorage
-    const fileData = {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      lastModified: file.lastModified,
-    };
-    localStorage.setItem('skilllinker_resume', JSON.stringify(fileData));
-    console.log('Resume uploaded:', file.name);
-  };
-
-  // Context value
-  const value = {
-    currentUser,
-    login,
-    register,
-    logout,
-    updateUser,
-    isLoading,
-    isAuthenticated: !!currentUser,
-    allUsers: mockUsers, // expose all mock users for admin dashboard
-    resume,
-    uploadResume,
+    localStorage.removeItem("skilllinker_user");
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        currentUser,
+        login,
+        register,
+        logout,
+        isAuthenticated: !!currentUser,
+        isLoading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

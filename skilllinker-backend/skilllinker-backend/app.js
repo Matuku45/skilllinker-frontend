@@ -4,27 +4,38 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-const cors = require('cors'); // <-- import cors
+const cors = require('cors');
 
 // Routers
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users.routes');
 var jobRouter = require('./routes/job.routes');
 var paymentRouter = require('./routes/payment.routes');
-var resumeRouter = require('./routes/resume.routes');             
-var applicationRouter = require('./routes/application.routes');   
-var messageRouter = require('./routes/message.routes');           
+var resumeRouter = require('./routes/resume.routes');
+var applicationRouter = require('./routes/application.routes');
+var messageRouter = require('./routes/message.routes');
 
 var app = express();
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://c1261275c3c0.ngrok-free.app'
+];
 
 app.use(cors({
-  origin: 'http://localhost:5173', // React frontend
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  origin: function(origin, callback){
+    // allow requests with no origin (like mobile apps or curl requests)
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
-
 
 // View engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -38,21 +49,21 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes with /api prefix
-app.use('/api', indexRouter);                 
+app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/jobs', jobRouter);
 app.use('/api/payments', paymentRouter);
-app.use('/api/resumes', resumeRouter);        
-app.use('/api/applications', applicationRouter); 
-app.use('/api/messages', messageRouter);      
+app.use('/api/resumes', resumeRouter);
+app.use('/api/applications', applicationRouter);
+app.use('/api/messages', messageRouter);
 
 // Catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // Error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   res.status(err.status || 500);

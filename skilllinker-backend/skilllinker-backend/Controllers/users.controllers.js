@@ -15,15 +15,21 @@ module.exports = {
     }
   },
 
-  login: async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      const result = await usersService.login(email, password);
-      res.json(result);
-    } catch (err) {
-      res.status(401).json({ error: err.message });
-    }
-  },
+login: async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const result = await usersService.login(email, password);
+
+    res.json({
+      success: true,
+      user: result.user,
+      token: result.token
+    });
+  } catch (err) {
+    res.status(401).json({ success: false, error: err.message });
+  }
+},
+
 
   getAll: async (req, res) => {
     try {
