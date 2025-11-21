@@ -32,6 +32,7 @@ const mockApplications = [
     // ADD THIS NEW ITEM:
     { name: "View Notifications", icon: FaBell, link: "/notifications" }, 
     { name: "View Applications", icon: FaCheck, link: "/applications" }, 
+        { name: "Make Payment", icon: FaBell, link: "/payment" }, 
 ];
 
 // Reusable Dropdown Component for Notifications and Applications
