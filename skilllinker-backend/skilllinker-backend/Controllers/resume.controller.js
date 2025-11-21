@@ -1,88 +1,83 @@
-const resumeService = require('../Services/resume.services');
+const db = require("../config/db");
 
-/**
- * Upload Resume (BLOB storage)
- */
+// UPLOAD RESUME
 exports.uploadResume = async (req, res) => {
   try {
-    // Validate file upload
     if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
     const { userId, description } = req.body;
 
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID is required' });
-    }
-
-    // Create resume entry in DB (with BLOB)
-    const resume = await resumeService.createResume(
-      userId,
-      req.file, // req.file.buffer exists because we use memoryStorage
-      description || "Resume upload"
+    const [result] = await db.query(
+      "INSERT INTO resumes (userId, fileName, mimeType, fileData, description) VALUES (?, ?, ?, ?, ?)",
+      [
+        userId,
+        req.file.originalname,
+        req.file.mimetype,
+        req.file.buffer,
+        description || "",
+      ]
     );
 
     return res.status(201).json({
       message: "Resume uploaded successfully",
-      resume
+      resume: {
+        id: result.insertId,
+        fileName: req.file.originalname,
+        mimeType: req.file.mimetype,
+      },
     });
-
   } catch (err) {
     console.error("UPLOAD ERROR:", err);
-    return res.status(500).json({
-      message: "Resume upload failed",
-      error: err.message
-    });
+    return res.status(500).json({ message: "Upload failed", error: err });
   }
 };
 
-
-/**
- * Get all resumes
- */
+// GET ALL RESUMES
 exports.getAllResumes = async (req, res) => {
   try {
-    const resumes = await resumeService.getAllResumes();
-    return res.status(200).json(resumes);
-
+    const [rows] = await db.query(
+      "SELECT id, userId, fileName, mimeType, description, createdAt FROM resumes"
+    );
+    res.json(rows);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    console.error("RESUME LIST ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch resumes" });
   }
 };
 
-
-/**
- * Get resume by ID
- */
+// GET ONE RESUME (DOWNLOAD)
 exports.getResumeById = async (req, res) => {
   try {
-    const resume = await resumeService.getResumeById(req.params.id);
+    const [rows] = await db.query(
+      "SELECT * FROM resumes WHERE id = ?",
+      [req.params.id]
+    );
 
-    if (!resume) {
+    if (rows.length === 0) {
       return res.status(404).json({ message: "Resume not found" });
     }
 
-    return res.status(200).json(resume);
+    const file = rows[0];
+
+    res.setHeader("Content-Type", file.mimeType);
+    res.setHeader("Content-Disposition", `attachment; filename="${file.fileName}"`);
+    res.send(file.fileData);
 
   } catch (err) {
-    return res.status(404).json({ error: err.message });
+    console.error("DOWNLOAD ERROR:", err);
+    res.status(500).json({ message: "Failed to download resume" });
   }
 };
 
-
-/**
- * Delete resume
- */
+// DELETE RESUME
 exports.deleteResume = async (req, res) => {
   try {
-    await resumeService.deleteResume(req.params.id);
-
-    return res.status(200).json({
-      message: 'Resume deleted successfully'
-    });
-
+    await db.query("DELETE FROM resumes WHERE id = ?", [req.params.id]);
+    res.json({ message: "Resume deleted" });
   } catch (err) {
-    return res.status(400).json({ error: err.message });
+    console.error("DELETE ERROR:", err);
+    res.status(500).json({ message: "Failed to delete resume" });
   }
 };
