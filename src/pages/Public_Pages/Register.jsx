@@ -36,12 +36,22 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
+    // Password requirement checks (used in validation)
+    const isMinLength = formData.password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(formData.password);
+    const hasLowerCase = /[a-z]/.test(formData.password);
+    const hasNumber = /\d/.test(formData.password);
+    const allRequirementsMet = isMinLength && hasUpperCase && hasLowerCase && hasNumber;
+
     if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
     if (!formData.email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid";
+    
+    // Validate password against all displayed requirements
     if (!formData.password) newErrors.password = "Password is required";
-    else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters";
+    else if (!allRequirementsMet) newErrors.password = "Password must meet all complexity requirements.";
+    
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
     if (!formData.userType) newErrors.userType = "Please select your user type";
     if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the terms and conditions";
@@ -54,22 +64,34 @@ const Register = () => {
     e.preventDefault();
     if (validateForm()) {
       setIsLoading(true);
-      const result = await register({
-        ...formData,
-        password: "password" // Mock password for demo - in real app this would be hashed
-      });
-      if (result.success) {
-        // Redirect based on user type
-        const userType = formData.userType;
-        if (userType === 'sdp') {
-          navigate('/sdp/dashboard');
+      try {
+        // FIX: Replaced the hardcoded password with the actual password from formData
+        const result = await register({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password, // Corrected: Use the actual password from state
+          userType: formData.userType
+        });
+
+        if (result.success) {
+          // Redirect based on user type
+          const userType = formData.userType;
+          if (userType === 'sdp') {
+            navigate('/sdp/dashboard');
+          } else {
+            // Assuming 'assessor' and 'moderator' redirect to the same base dashboard for this logic
+            navigate('/assessor/dashboard'); 
+          }
         } else {
-          navigate('/assessor/dashboard');
+          // Display the specific error message from the registration result, if available
+          setErrors({ general: result.message || "Registration failed. Please try again." });
         }
-      } else {
-        setErrors({ general: "Registration failed. Please try again." });
+      } catch (error) {
+        setErrors({ general: "An unexpected error occurred during registration." });
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
   };
 
@@ -78,6 +100,7 @@ const Register = () => {
     console.log(`Register with ${provider}`);
   };
 
+  // Password requirements for display (kept for visual feedback)
   const passwordRequirements = [
     { text: "At least 8 characters", met: formData.password.length >= 8 },
     { text: "Contains uppercase letter", met: /[A-Z]/.test(formData.password) },

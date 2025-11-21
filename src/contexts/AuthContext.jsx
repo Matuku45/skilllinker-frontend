@@ -34,36 +34,36 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-// AuthContext.jsx - CORRECTED LOGIN FUNCTION
-const login = async (email, password) => {
-  try {
-    const res = await axios.post(`${API_URL}/users/login`, {
-      email,
-      password,
-    });
+  // AuthContext.jsx - CORRECTED LOGIN FUNCTION
+  const login = async (email, password) => {
+    try {
+      const res = await axios.post(`${API_URL}/users/login`, {
+        email,
+        password,
+      });
 
-    // Success return logic:
-    const { user, token } = res.data;
-    const userWithToken = { ...user, token };
+      // Success return logic:
+      const { user, token } = res.data;
+      const userWithToken = { ...user, token };
 
-    // 1. Set the user in React state (triggers component updates/redirection)
-    setCurrentUser(userWithToken); 
-    
-    // 2. Store token and user data in browser cache (localStorage)
-    localStorage.setItem("skilllinker_user", JSON.stringify(user));
-    localStorage.setItem("skilllinker_token", token);
+      // 1. Set the user in React state (triggers component updates/redirection)
+      setCurrentUser(userWithToken); 
+      
+      // 2. Store token and user data in browser cache (localStorage)
+      localStorage.setItem("skilllinker_user", JSON.stringify(user));
+      localStorage.setItem("skilllinker_token", token);
 
-    // 3. Return success object to the component (Login.jsx)
-    return { success: true, user: userWithToken };
-    
-  } catch (err) {
-    // Failure return logic (Handles 401 or network errors)
-    return {
-      success: false,
-      error: err.response?.data?.error || "Login failed due to network error or server down",
-    };
-  }
-};
+      // 3. Return success object to the component (Login.jsx)
+      return { success: true, user: userWithToken };
+      
+    } catch (err) {
+      // Failure return logic (Handles 401 or network errors)
+      return {
+        success: false,
+        error: err.response?.data?.error || "Login failed due to network error or server down",
+      };
+    }
+  };
 
   const register = async (userData) => {
     try {
@@ -99,29 +99,29 @@ const login = async (email, password) => {
     if (!currentUser?.token || !currentUser?.id) return;
     setLoadingResume(true);
     try {
-        // Fetching resume data, assuming backend handles the user ID from auth/path
-        const res = await axios.get(`${API_URL}/resumes/${currentUser.id}`, {
-            headers: { Authorization: `Bearer ${currentUser.token}` },
-            // responseType: 'blob', // Use if you need the actual file blob
-        });
+      // Fetching resume data, assuming backend handles the user ID from auth/path
+      const res = await axios.get(`${API_URL}/resumes/${currentUser.id}`, {
+        headers: { Authorization: `Bearer ${currentUser.token}` },
+        // responseType: 'blob', // Use if you need the actual file blob
+      });
         
-        // Assuming the response contains resume metadata (e.g., filename, id)
-        // Adjust based on your backend return structure (e.g., res.data.filename)
-        if (res.data.filename) {
-             setResume({ name: res.data.filename, id: res.data.id });
-        } else {
-             setResume(null); // No resume found
-        }
-       
+      // Assuming the response contains resume metadata (e.g., filename, id)
+      // Adjust based on your backend return structure (e.g., res.data.filename)
+      if (res.data.filename) {
+        setResume({ name: res.data.filename, id: res.data.id });
+      } else {
+        setResume(null); // No resume found
+      }
+        
     } catch (err) {
-        // 404 is common if no resume exists; handle silently
-        if (err.response?.status === 404) {
-            setResume(null);
-        } else {
-            console.error('Error fetching resume:', err);
-        }
+      // 404 is common if no resume exists; handle silently
+      if (err.response?.status === 404) {
+        setResume(null);
+      } else {
+        console.error('Error fetching resume:', err);
+      }
     } finally {
-        setLoadingResume(false);
+      setLoadingResume(false);
     }
   }, [currentUser?.token, currentUser?.id]);
 
@@ -159,7 +159,7 @@ const login = async (email, password) => {
   // Load resume when user logs in/page refreshes
   useEffect(() => {
     if (currentUser?.token) {
-        fetchResume(); 
+      fetchResume(); 
     }
   }, [currentUser?.token, fetchResume]);
 

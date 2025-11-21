@@ -35,6 +35,7 @@ import Profile3 from './pages/Skill_Development_Provider_Dashboard/Profile';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Applications2 from './pages/Skill_Development_Provider_Dashboard/Applications';
+import PostJob from './pages/Skill_Development_Provider_Dashboard/PostJob';
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -197,6 +198,19 @@ const PublicRoute = ({ children }) => {
     }
   />  
     
+
+
+{/* Post Job Route (SDP Only) */}
+<Route
+  path="/sdp/post-job"
+  element={
+    <ProtectedRoute allowedRoles={['sdp']}>
+      <PostJob />
+    </ProtectedRoute>
+  }
+/>
+
+           
 
 
 
