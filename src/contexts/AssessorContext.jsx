@@ -17,7 +17,9 @@ export const AssessorProvider = ({ children }) => {
 
   const apiUrl = 'http://localhost:3000/api';
 
-  // Fetch all jobs (public)
+  // ---------------------------
+  // Jobs
+  // ---------------------------
   const fetchJobs = useCallback(async () => {
     setLoadingJobs(true);
     try {
@@ -30,7 +32,9 @@ export const AssessorProvider = ({ children }) => {
     }
   }, []);
 
-  // Fetch applications for logged-in user
+  // ---------------------------
+  // Applications
+  // ---------------------------
   const fetchApplications = useCallback(async () => {
     if (!currentUser?.token) return;
     setLoadingApplications(true);
@@ -46,7 +50,6 @@ export const AssessorProvider = ({ children }) => {
     }
   }, [currentUser?.token]);
 
-  // Apply to a job
   const applyToJob = useCallback(
     async (jobId, coverLetter) => {
       if (!currentUser?.token) throw new Error('User not logged in');
@@ -56,7 +59,7 @@ export const AssessorProvider = ({ children }) => {
           { jobId, coverLetter },
           { headers: { Authorization: `Bearer ${currentUser.token}` } }
         );
-        fetchApplications(); // refresh after applying
+        fetchApplications(); // refresh applications after applying
         return res.data;
       } catch (err) {
         console.error('Error applying to job:', err);
@@ -67,17 +70,15 @@ export const AssessorProvider = ({ children }) => {
   );
 
   // ---------------------------
-  // Resume Management Functions
+  // Resume Management
   // ---------------------------
-
-  // Fetch resume for logged-in user
   const fetchResume = useCallback(async () => {
     if (!currentUser?.token) return;
     setLoadingResume(true);
     try {
-      const res = await axios.get(`${apiUrl}/resume`, {
+      const res = await axios.get(`${apiUrl}/resumes`, {
         headers: { Authorization: `Bearer ${currentUser.token}` },
-        responseType: 'blob', // to download or preview
+        responseType: 'blob',
       });
       if (res.data) setResume(res.data);
     } catch (err) {
@@ -87,26 +88,32 @@ export const AssessorProvider = ({ children }) => {
     }
   }, [currentUser?.token]);
 
-  // Upload resume
-export const uploadResume = async (file, token) => {
-  const formData = new FormData();
-  formData.append('resume', file);
+  const uploadResume = useCallback(
+    async (file) => {
+      if (!currentUser?.token) throw new Error('User not logged in');
 
-  const res = await fetch('http://localhost:3000/api/resumes/upload', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}` // Make sure you send the JWT if required
+      const formData = new FormData();
+      formData.append('resume', file);
+
+      setLoadingResume(true);
+      try {
+        const res = await axios.post(`${apiUrl}/resumes/upload`, formData, {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        setResume(file); // update local state
+        return { success: true, data: res.data };
+      } catch (err) {
+        console.error('Error uploading resume:', err);
+        return { success: false, error: err.response?.data?.error || err.message };
+      } finally {
+        setLoadingResume(false);
+      }
     },
-    body: formData,
-  });
-
-  if (!res.ok) {
-    const error = await res.json();
-    return { success: false, error: error.message || 'Upload failed' };
-  }
-
-  return { success: true };
-};
+    [currentUser?.token]
+  );
 
   // ---------------------------
   // Effects
