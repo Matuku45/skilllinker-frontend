@@ -4,28 +4,29 @@ const resumeService = require('../Services/resume.services');
 exports.uploadResume = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
+      return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    const { description, userId } = req.body;
+    const { userId, description } = req.body;
 
     if (!userId) {
-      return res.status(400).json({ message: "Missing userId" });
+      return res.status(400).json({ message: 'User ID is required' });
     }
 
     const resume = await resumeService.createResume(
-      userId,
-      req.file, 
+      userId,        // FIXED
+      req.file,      // file
       description
     );
 
     res.status(201).json({
       message: "Resume uploaded successfully",
-      resume,
+      resume
     });
 
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error("UPLOAD ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -39,7 +40,7 @@ exports.getAllResumes = async (req, res) => {
   }
 };
 
-// Get resume by ID
+// Get a resume by ID
 exports.getResumeById = async (req, res) => {
   try {
     const resume = await resumeService.getResumeById(req.params.id);
@@ -49,11 +50,11 @@ exports.getResumeById = async (req, res) => {
   }
 };
 
-// Delete resume
+// Delete a resume
 exports.deleteResume = async (req, res) => {
   try {
     await resumeService.deleteResume(req.params.id);
-    res.status(200).json({ message: "Resume deleted successfully" });
+    res.status(200).json({ message: 'Resume deleted successfully' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
