@@ -34,31 +34,36 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  // --- Authentication Functions ---
+// AuthContext.jsx - CORRECTED LOGIN FUNCTION
+const login = async (email, password) => {
+  try {
+    const res = await axios.post(`${API_URL}/users/login`, {
+      email,
+      password,
+    });
 
-  const login = async (email, password) => {
-    try {
-      const res = await axios.post(`${API_URL}/users/login`, {
-        email,
-        password,
-      });
+    // Success return logic:
+    const { user, token } = res.data;
+    const userWithToken = { ...user, token };
 
-      const { user, token } = res.data;
-      const userWithToken = { ...user, token };
+    // 1. Set the user in React state (triggers component updates/redirection)
+    setCurrentUser(userWithToken); 
+    
+    // 2. Store token and user data in browser cache (localStorage)
+    localStorage.setItem("skilllinker_user", JSON.stringify(user));
+    localStorage.setItem("skilllinker_token", token);
 
-      setCurrentUser(userWithToken); 
-      localStorage.setItem("skilllinker_user", JSON.stringify(user));
-      localStorage.setItem("skilllinker_token", token);
-
-      return { success: true, user: userWithToken };
-    } catch (err) {
-      return {
-        success: false,
-        error: err.response?.data?.error || "Login failed",
-      };
-    }
-  };
-
+    // 3. Return success object to the component (Login.jsx)
+    return { success: true, user: userWithToken };
+    
+  } catch (err) {
+    // Failure return logic (Handles 401 or network errors)
+    return {
+      success: false,
+      error: err.response?.data?.error || "Login failed due to network error or server down",
+    };
+  }
+};
 
   const register = async (userData) => {
     try {
