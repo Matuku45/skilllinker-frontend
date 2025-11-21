@@ -3,14 +3,20 @@ import { useParams, useNavigate } from "react-router-dom";
 import { mockJobs } from "../../data/mockData";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
+
 import {
   FaBriefcase,
   FaMapMarkerAlt,
   FaCalendarAlt,
   FaCheck,
 } from "react-icons/fa";
-import ApplicationModal from "./ApplicationModal"; // assume extracted
 
+import ApplicationModal from "./ApplicationModal"; 
+
+
+/* =========================================================================
+   JOB DETAILS PAGE
+=========================================================================== */
 const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -19,6 +25,7 @@ const JobDetails = () => {
   const [job, setJob] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
+  /* Get Job from Mock Data */
   useEffect(() => {
     const foundJob = mockJobs.find((j) => j.id === parseInt(id));
     setJob(foundJob);
@@ -32,9 +39,9 @@ const JobDetails = () => {
     );
   }
 
-  /* ------------------------------------------
-     MAIN APPLICATION LOGIC
-  ------------------------------------------ */
+  /* =========================================================================
+     HANDLE APPLICATION (Upload Resume + Create Application)
+  ========================================================================= */
   const handleApplication = async (resume, coverLetter) => {
     try {
       if (!currentUser) {
@@ -42,13 +49,15 @@ const JobDetails = () => {
         return;
       }
 
+      /* ------------------------------------------
+         STEP 1: Upload Resume
+      ------------------------------------------- */
       const uploadForm = new FormData();
       uploadForm.append("userId", currentUser.id);
-      uploadForm.append("description", "Resume upload");
+      uploadForm.append("description", "Uploaded for job application");
       uploadForm.append("resume", resume);
 
-      // 1️⃣ Upload Resume to Backend
-      const uploadResponse = await axios.post(
+      const resumeUploadRes = await axios.post(
         "http://localhost:3000/api/resumes/upload",
         uploadForm,
         {
@@ -59,9 +68,11 @@ const JobDetails = () => {
         }
       );
 
-      const uploadedResumeId = uploadResponse.data.resume.id;
+      const uploadedResumeId = resumeUploadRes.data.resume.id;
 
-      // 2️⃣ Create Application Record
+      /* ------------------------------------------
+         STEP 2: Create Application
+      ------------------------------------------- */
       await axios.post(
         "http://localhost:3000/api/applications",
         {
@@ -81,13 +92,18 @@ const JobDetails = () => {
       setShowModal(false);
 
     } catch (err) {
-      console.error("Application error:", err);
-      alert("Failed to submit application.");
+      console.error("Application error:", err.response?.data || err);
+      alert("Failed to submit application. Please try again.");
     }
   };
 
+  /* =========================================================================
+     UI RENDERING
+  ========================================================================= */
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 p-6">
+
+      {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
         className="flex items-center text-blue-600 hover:text-blue-800 transition mb-6"
@@ -95,7 +111,10 @@ const JobDetails = () => {
         ← Back to Jobs
       </button>
 
+      {/* Main Job Card */}
       <div className="bg-white rounded-xl shadow-xl p-8 border border-gray-100 max-w-3xl mx-auto">
+
+        {/* Job Header */}
         <div className="flex justify-between items-start">
           <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
           <span className="px-3 py-1 text-sm rounded-full bg-green-100 text-green-700">
@@ -103,10 +122,12 @@ const JobDetails = () => {
           </span>
         </div>
 
+        {/* Description */}
         <p className="mt-4 text-gray-700 text-lg leading-relaxed">
           {job.description}
         </p>
 
+        {/* Job Info Section */}
         <div className="mt-6 space-y-3">
           <div className="flex items-center text-gray-600">
             <FaBriefcase className="mr-2 text-blue-500" />
@@ -121,11 +142,13 @@ const JobDetails = () => {
           <div className="flex items-center text-gray-600">
             <FaCalendarAlt className="mr-2 text-purple-500" />
             <span>
-              Deadline: <strong>{new Date(job.deadline).toLocaleDateString()}</strong>
+              Deadline:{" "}
+              <strong>{new Date(job.deadline).toLocaleDateString()}</strong>
             </span>
           </div>
         </div>
 
+        {/* Required Qualifications */}
         <div className="mt-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">
             Required Qualifications:
@@ -143,6 +166,7 @@ const JobDetails = () => {
           </ul>
         </div>
 
+        {/* Apply Button */}
         <button
           onClick={() => setShowModal(true)}
           className="mt-8 w-full py-3 bg-blue-600 text-white rounded-lg shadow-lg text-lg font-medium hover:bg-blue-700 transition"
@@ -151,6 +175,7 @@ const JobDetails = () => {
         </button>
       </div>
 
+      {/* Application Modal */}
       {showModal && (
         <ApplicationModal
           job={job}

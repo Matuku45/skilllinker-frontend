@@ -3,17 +3,9 @@ const express = require('express');
 const router = express.Router();
 const resumeController = require('../Controllers/resume.controller');
 const multer = require('multer');
-const path = require('path');
 
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // make sure this folder exists
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
+// Store file in memory (required for BLOB storage)
+const storage = multer.memoryStorage();
 
 // File validation
 const fileFilter = (req, file, cb) => {
@@ -32,7 +24,11 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ storage, fileFilter });
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 } // optional: 10MB limit
+});
 
 // Routes
 router.post('/upload', upload.single('resume'), resumeController.uploadResume);
