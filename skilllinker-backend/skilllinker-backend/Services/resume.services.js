@@ -1,21 +1,23 @@
 const Resume = require('../sqlmodel/models/Resume');
 
 exports.createResume = async (userId, file, description) => {
+  if (!userId || !file) throw new Error('userId and file are required');
+
   return await Resume.create({
     userId,
     data: file.buffer,
     filename: file.originalname,
     mimetype: file.mimetype,
-    description
+    description,
   });
 };
 
 exports.getAllResumes = async () => {
-  return await Resume.findAll({ include: ['user'] });
+  return await Resume.findAll(); // no associations
 };
 
 exports.getResumeById = async (id) => {
-  return await Resume.findByPk(id, { include: ['user'] });
+  return await Resume.findByPk(id); // no associations
 };
 
 exports.deleteResume = async (id) => {

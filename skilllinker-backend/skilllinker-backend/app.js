@@ -22,7 +22,6 @@ const allowedOrigins = [
   'https://866c5e8983e9.ngrok-free.app'
 ];
 
-
 app.use(cors({
   origin: function(origin, callback){
     // allow requests with no origin (like mobile apps or curl requests)
@@ -70,5 +69,18 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
+// In app.js (after all routes)
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ message: err.message });
+  } else if (err) {
+    return res.status(500).json({ message: err.message });
+  }
+  next();
+});
+
+
 
 module.exports = app;
