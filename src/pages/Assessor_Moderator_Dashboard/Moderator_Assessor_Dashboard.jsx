@@ -116,13 +116,10 @@ const ModeratorAssessorDashboard = () => {
 
   /* ---------------------------
       OPEN APPLICATION MODAL
+      (VERIFICATION REMOVED)
   --------------------------- */
   const openApplyModal = (job) => {
-    if (!currentUser?.verified) {
-      alert("Please verify your account to apply.");
-      return;
-    }
-    setSelectedJob(job);
+    setSelectedJob(job); // ✔ no verification check
   };
 
   /* ---------------------------
@@ -150,7 +147,7 @@ const ModeratorAssessorDashboard = () => {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
-      {/* --------------------- SIDEBAR ----------------------- */}
+      {/* SIDEBAR */}
       <aside className="w-full md:w-64 bg-white shadow-md p-4 sticky top-0 h-screen overflow-y-auto z-20">
         <h2 className="text-xl font-bold mb-4 flex items-center">
           <FaBriefcase className="mr-2" /> Jobs
@@ -185,26 +182,18 @@ const ModeratorAssessorDashboard = () => {
         )}
       </aside>
 
-      {/* --------------------- MAIN CONTENT ----------------------- */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 relative">
         {/* HEADER */}
-        <div className="sticky top-0 z-30 bg-gray-50 shadow-sm">
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900">SkillLinker Dashboard</h1>
+        <div className="sticky top-0 bg-gray-50 shadow-sm z-30">
+          <header className="flex justify-between items-center p-4 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-900">
+              SkillLinker Dashboard
+            </h1>
 
-            <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
+            <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">
                 Welcome, {currentUser.firstName} {currentUser.lastName}
-              </span>
-
-              <span
-                className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  currentUser.verified
-                    ? "bg-green-100 text-green-800"
-                    : "bg-yellow-100 text-yellow-800"
-                }`}
-              >
-                {currentUser.verified ? "Verified" : "Pending Verification"}
               </span>
 
               <button
@@ -217,29 +206,29 @@ const ModeratorAssessorDashboard = () => {
           </header>
 
           {/* TABS */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-4 py-2 bg-gray-50">
-              {["profile", "jobs"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === tab
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {tab === "profile" ? (
-                    <span className="flex items-center">
-                      <FaUser className="mr-1" /> Profile
-                    </span>
-                  ) : (
-                    "All Jobs"
-                  )}
-                </button>
-              ))}
-            </nav>
-          </div>
+          <nav className="flex space-x-8 px-4 py-2 border-b bg-gray-50">
+            <button
+              onClick={() => setActiveTab("profile")}
+              className={`py-2 ${
+                activeTab === "profile"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600"
+              }`}
+            >
+              <FaUser className="inline mr-1" /> Profile
+            </button>
+
+            <button
+              onClick={() => setActiveTab("jobs")}
+              className={`py-2 ${
+                activeTab === "jobs"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600"
+              }`}
+            >
+              All Jobs
+            </button>
+          </nav>
         </div>
 
         {/* CONTENT */}
@@ -249,11 +238,11 @@ const ModeratorAssessorDashboard = () => {
           {activeTab === "jobs" && (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {loadingJobs ? (
-                <div className="text-center py-12 col-span-full text-gray-500">
+                <div className="col-span-full text-center text-gray-500">
                   Loading...
                 </div>
               ) : jobs.length === 0 ? (
-                <div className="text-center py-12 col-span-full text-gray-400">
+                <div className="col-span-full text-center text-gray-400">
                   No jobs found
                 </div>
               ) : (
@@ -263,7 +252,6 @@ const ModeratorAssessorDashboard = () => {
                     className="shadow-lg rounded-lg bg-white overflow-hidden hover:scale-105 transition-transform"
                   >
                     <div className="p-6 flex flex-col justify-between h-full">
-                      {/* JOB DETAILS */}
                       <div>
                         <div className="flex justify-between items-center">
                           <h3 className="text-lg font-semibold">{job.title}</h3>

@@ -1,65 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { mockJobs } from '../../data/mockData';
-import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaCheck } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { mockJobs } from "../../data/mockData";
+import {
+  FaBriefcase,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaCheck,
+} from "react-icons/fa";
 
 /* ---------------------------------------------------
-   APPLICATION MODAL
+   APPLICATION MODAL — MODERN TAILWIND UI
 --------------------------------------------------- */
 const ApplicationModal = ({ job, user, onClose, onSubmit }) => {
   const [resume, setResume] = useState(null);
-  const [coverLetter, setCoverLetter] = useState("I am interested in this job.");
-
-  const handleFileChange = (e) => {
-    setResume(e.target.files[0]);
-  };
+  const [coverLetter, setCoverLetter] = useState(
+    "I am interested in this job."
+  );
 
   const handleSubmit = () => {
     if (!resume) return alert("Please upload your resume.");
     onSubmit({ resume, coverLetter });
   };
 
-  if (!job) return null;
-
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-      <div className="bg-white rounded-lg w-full max-w-lg p-6 shadow-xl">
-        <h2 className="text-xl font-bold mb-4">Apply for {job.title}</h2>
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center backdrop-blur-sm z-50">
+      <div className="bg-white w-full max-w-xl p-6 rounded-xl shadow-2xl border border-gray-200 animate-fadeIn">
+        
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          Apply for {job.title}
+        </h2>
 
-        <div className="space-y-3">
-          {/* Name */}
+        <div className="space-y-4">
+          {/* Full Name */}
           <div>
-            <label className="font-medium text-gray-700">Full Name</label>
+            <label className="block mb-1 font-medium text-gray-700">
+              Full Name
+            </label>
             <input
-              type="text"
-              value={`${user.firstName} ${user.lastName}`}
               disabled
-              className="w-full border p-2 rounded bg-gray-100"
+              className="w-full bg-gray-100 border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-200"
+              value={`${user.firstName} ${user.lastName}`}
             />
           </div>
 
           {/* Email */}
           <div>
-            <label className="font-medium text-gray-700">Email</label>
+            <label className="block mb-1 font-medium text-gray-700">
+              Email
+            </label>
             <input
-              type="text"
-              value={user.email}
               disabled
-              className="w-full border p-2 rounded bg-gray-100"
+              className="w-full bg-gray-100 border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-200"
+              value={user.email}
             />
           </div>
 
-          {/* Resume Upload */}
+          {/* Resume */}
           <div>
-            <label className="font-medium text-gray-700">Upload Resume</label>
-            <input type="file" onChange={handleFileChange} className="w-full" />
+            <label className="block mb-1 font-medium text-gray-700">
+              Upload Resume
+            </label>
+            <input
+              type="file"
+              onChange={(e) => setResume(e.target.files[0])}
+              className="w-full border rounded-lg p-2"
+            />
           </div>
 
           {/* Cover Letter */}
           <div>
-            <label className="font-medium text-gray-700">Cover Letter</label>
+            <label className="block mb-1 font-medium text-gray-700">
+              Cover Letter
+            </label>
             <textarea
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 rounded-lg p-3 focus:ring focus:ring-blue-200"
               rows={4}
               value={coverLetter}
               onChange={(e) => setCoverLetter(e.target.value)}
@@ -67,18 +81,17 @@ const ApplicationModal = ({ job, user, onClose, onSubmit }) => {
           </div>
         </div>
 
-        {/* Modal Buttons */}
+        {/* Buttons */}
         <div className="mt-6 flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition"
           >
             Cancel
           </button>
-
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow transition"
           >
             Submit Application
           </button>
@@ -89,79 +102,95 @@ const ApplicationModal = ({ job, user, onClose, onSubmit }) => {
 };
 
 /* ---------------------------------------------------
-   MAIN PAGE — JOB DETAILS
+   JOB DETAILS PAGE — MODERN TAILWIND UI
 --------------------------------------------------- */
 const JobDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [job, setJob] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  const navigate = useNavigate();
-
-  // Mock authenticated user (replace with real context later)
   const currentUser = {
     firstName: "John",
     lastName: "Doe",
-    email: "john.doe@mail.com"
+    email: "john.doe@mail.com",
   };
 
   useEffect(() => {
-    const foundJob = mockJobs.find(j => j.id === parseInt(id));
+    const foundJob = mockJobs.find((j) => j.id === parseInt(id));
     setJob(foundJob);
   }, [id]);
 
-  if (!job) return <p className="p-6 text-gray-500">Loading job details...</p>;
+  if (!job)
+    return (
+      <p className="p-6 text-gray-500 text-center text-xl animate-pulse">
+        Loading job details...
+      </p>
+    );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 p-6">
+      
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
-        className="mb-4 text-blue-600 hover:underline"
+        className="flex items-center text-blue-600 hover:text-blue-800 transition mb-6"
       >
-        &larr; Back to Job Board
+        ← Back to Jobs
       </button>
 
-      {/* Job Details Card */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">{job.title}</h1>
+      {/* Main Job Card */}
+      <div className="bg-white rounded-xl shadow-xl p-8 border border-gray-100 max-w-3xl mx-auto">
 
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+        {/* Header */}
+        <div className="flex justify-between items-start">
+          <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
+
+          <span className="px-3 py-1 text-sm rounded-full bg-green-100 text-green-700">
             {job.status}
           </span>
         </div>
 
-        <p className="mt-4 text-gray-700">{job.description}</p>
+        {/* Description */}
+        <p className="mt-4 text-gray-700 text-lg leading-relaxed">
+          {job.description}
+        </p>
 
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center text-gray-500">
-            <FaBriefcase className="mr-2" />
-            {job.sdpName}
+        {/* Job Info */}
+        <div className="mt-6 space-y-3">
+          <div className="flex items-center text-gray-600">
+            <FaBriefcase className="mr-2 text-blue-500" />
+            <span>{job.sdpName}</span>
           </div>
 
-          <div className="flex items-center text-gray-500">
-            <FaMapMarkerAlt className="mr-2" />
-            {job.location}
+          <div className="flex items-center text-gray-600">
+            <FaMapMarkerAlt className="mr-2 text-red-500" />
+            <span>{job.location}</span>
           </div>
 
-          <div className="flex items-center text-gray-500">
-            <FaCalendarAlt className="mr-2" />
-            Deadline: {new Date(job.deadline).toLocaleDateString()}
+          <div className="flex items-center text-gray-600">
+            <FaCalendarAlt className="mr-2 text-purple-500" />
+            <span>
+              Deadline:{" "}
+              <strong>{new Date(job.deadline).toLocaleDateString()}</strong>
+            </span>
           </div>
         </div>
 
         {/* Qualifications */}
-        <div className="mt-6">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">
             Required Qualifications:
           </h3>
 
-          <ul className="text-gray-700 space-y-1">
+          <ul className="space-y-2">
             {job.requiredQualifications.map((qual, index) => (
-              <li key={index} className="flex items-center">
-                <FaCheck className="mr-2 text-green-500" /> {qual}
+              <li
+                key={index}
+                className="flex items-center bg-gray-100 p-2 rounded-lg text-gray-700"
+              >
+                <FaCheck className="mr-2 text-green-600" /> {qual}
               </li>
             ))}
           </ul>
@@ -170,35 +199,26 @@ const JobDetails = () => {
         {/* APPLY BUTTON */}
         <button
           onClick={() => setShowModal(true)}
-          className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="mt-8 w-full py-3 bg-blue-600 text-white rounded-lg shadow-lg text-lg font-medium hover:bg-blue-700 transition"
         >
           Apply for this Job
         </button>
       </div>
 
-      {/* APPLICATION MODAL */}
+      {/* Modal */}
       {showModal && (
         <ApplicationModal
           job={job}
           user={currentUser}
           onClose={() => setShowModal(false)}
           onSubmit={({ resume, coverLetter }) => {
-            
-            // BUILD FORM-DATA
             const formData = new FormData();
             formData.append("jobId", job.id);
             formData.append("resume", resume);
             formData.append("coverLetter", coverLetter);
 
-            // TODO: Replace with real API call
-            console.log("APPLICATION SUBMITTED:", {
-              jobId: job.id,
-              resume,
-              coverLetter
-            });
-
+            console.log("APPLICATION SUBMITTED:", formData);
             alert("Application submitted successfully!");
-
             setShowModal(false);
           }}
         />
