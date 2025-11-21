@@ -3,10 +3,13 @@ import axios from "axios";
 const API_URL = "http://localhost:3000/api";
 
 // Fetch ALL jobs
-export const getJobs = async () => {
-  const res = await axios.get(`${API_URL}/jobs`);
-  return res.data;
+export const getJobs = async (token) => {
+    const res = await axios.get(`${API_URL}/jobs?ts=${Date.now()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
 };
+
 
 // Create a NEW Job
 export const createJob = async (jobData, token) => {

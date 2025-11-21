@@ -6,6 +6,8 @@ import {
     FaBriefcase, FaPlus, FaBell, FaUser, FaMapMarkerAlt,
     FaDollarSign, FaFolderOpen, FaSignOutAlt, FaLaptopCode
 } from "react-icons/fa";
+import axios from "axios";
+const API_URL = "http://localhost:3000/api"; // ✅ Add this here
 
 const SDS_Dashboard = () => {
     const { currentUser, logout } = useAuth();
@@ -16,18 +18,21 @@ const SDS_Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [currentView, setCurrentView] = useState("dashboard");
 
-    const loadJobs = async () => {
-        setLoading(true);
-        try {
-            const data = await getJobs();
-            const myJobs = data.filter(job => job?.postedBy === currentUser?.id);
-            setJobs(myJobs);
-        } catch (error) {
-            console.error("Error loading jobs:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+const loadJobs = async () => {
+    setLoading(true);
+    try {
+        const res = await axios.get(`${API_URL}/jobs?ts=${Date.now()}`, {
+            headers: { Authorization: `Bearer ${currentUser.token}` },
+        });
+        setJobs(res.data); // Show all jobs
+    } catch (err) {
+        console.error("Error loading jobs:", err);
+    } finally {
+        setLoading(false);
+    }
+};
+
+
 
     // Load jobs on mount and whenever the user navigates back to this page
     useEffect(() => {
