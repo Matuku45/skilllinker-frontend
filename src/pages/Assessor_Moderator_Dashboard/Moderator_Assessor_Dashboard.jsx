@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useAssessor } from "../../contexts/AssessorContext";
 import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaCheck } from "react-icons/fa";
@@ -6,10 +6,15 @@ import Profile from "./Profile";
 
 const ModeratorAssessorDashboard = () => {
   const { currentUser, logout } = useAuth();
-  const { jobs, loadingJobs, fetchJobs } = useAssessor();
-  const [activeTab, setActiveTab] = useState("profile"); // default tab
+  const { jobs, loadingJobs, fetchJobs: fetchJobsFromContext } = useAssessor();
+  const [activeTab, setActiveTab] = useState("profile");
 
-  // Fetch jobs for everyone on mount or when currentUser changes
+  // Wrap fetchJobs in useCallback to avoid infinite loops
+  const fetchJobs = useCallback(() => {
+    fetchJobsFromContext();
+  }, [fetchJobsFromContext]);
+
+  // Fetch jobs on mount
   useEffect(() => {
     fetchJobs();
   }, [currentUser?.token, fetchJobs]);
@@ -113,7 +118,10 @@ const ModeratorAssessorDashboard = () => {
               </div>
             ) : (
               jobs.map((job) => (
-                <div key={job.id} className="bg-white overflow-hidden shadow rounded-lg">
+                <div
+                  key={job.id}
+                  className="overflow-hidden shadow rounded-lg bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50"
+                >
                   <div className="p-6">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-medium text-gray-900">{job.title}</h3>
