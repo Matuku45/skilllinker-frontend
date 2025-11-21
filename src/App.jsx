@@ -23,7 +23,7 @@ import ForgotPassword from './pages/Public_Pages/ForgotPassword';
 import { AssessorProvider } from './contexts/AssessorContext';
 // Import Profile
 import Profile from './pages/Assessor_Moderator_Dashboard/Profile';
-
+import JobDetails from './pages/Assessor_Moderator_Dashboard/JobDetails';
 
 // Dashboard Pages
 import ModeratorAssessorDashboard from './pages/Assessor_Moderator_Dashboard/Moderator_Assessor_Dashboard';
@@ -126,6 +126,12 @@ const PublicRoute = ({ children }) => {
               </ProtectedRoute>
             }
           />
+
+{/* Job Details Route */}
+ <Route path="/job-details/:jobId" 
+ element={ <ProtectedRoute allowedRoles={['assessor', 'moderator']}>
+ <AssessorProvider> <JobDetails />
+  </AssessorProvider> </ProtectedRoute> } />
 
 
 
