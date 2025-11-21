@@ -15,13 +15,11 @@ export const AssessorProvider = ({ children }) => {
 
   const apiUrl = 'http://localhost:3000/api';
 
-  // Fetch all jobs
+  // Fetch all jobs (available to everyone)
   const fetchJobs = async () => {
     setLoadingJobs(true);
     try {
-      const res = await axios.get(`${apiUrl}/jobs`, {
-        headers: { Authorization: `Bearer ${currentUser.token}` }
-      });
+      const res = await axios.get(`${apiUrl}/jobs`); // no auth header
       setJobs(res.data);
     } catch (err) {
       console.error('Error fetching jobs:', err);
@@ -30,14 +28,14 @@ export const AssessorProvider = ({ children }) => {
     }
   };
 
-  // Fetch all applications by current user
+  // Fetch applications for current user (only if logged in)
   const fetchApplications = async () => {
+    if (!currentUser?.token) return; // skip if no token
     setLoadingApplications(true);
     try {
       const res = await axios.get(`${apiUrl}/applications`, {
         headers: { Authorization: `Bearer ${currentUser.token}` }
       });
-      // Filter applications only for this user if needed
       setApplications(res.data);
     } catch (err) {
       console.error('Error fetching applications:', err);
@@ -46,8 +44,9 @@ export const AssessorProvider = ({ children }) => {
     }
   };
 
-  // Apply to a job
+  // Apply to a job (only for logged-in users)
   const applyToJob = async (jobId, coverLetter) => {
+    if (!currentUser?.token) throw new Error('User not logged in');
     try {
       const res = await axios.post(`${apiUrl}/applications`, {
         jobId,
@@ -55,8 +54,7 @@ export const AssessorProvider = ({ children }) => {
       }, {
         headers: { Authorization: `Bearer ${currentUser.token}` }
       });
-      // Refresh applications list
-      fetchApplications();
+      fetchApplications(); // refresh applications
       return res.data;
     } catch (err) {
       console.error('Error applying to job:', err);
@@ -64,10 +62,10 @@ export const AssessorProvider = ({ children }) => {
     }
   };
 
-  // On mount, fetch jobs and applications
+  // Fetch jobs for everyone; fetch applications only if logged in
   useEffect(() => {
+    fetchJobs();
     if (currentUser?.token) {
-      fetchJobs();
       fetchApplications();
     }
   }, [currentUser?.token]);

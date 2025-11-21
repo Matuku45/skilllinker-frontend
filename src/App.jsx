@@ -20,7 +20,7 @@ import Login from './pages/Public_Pages/Login';
 import Register from './pages/Public_Pages/Register';
 import ForgotPassword from './pages/Public_Pages/ForgotPassword';
 
-
+import { AssessorProvider } from './contexts/AssessorContext';
 // Import Profile
 import Profile from './pages/Assessor_Moderator_Dashboard/Profile';
 
@@ -97,14 +97,19 @@ const PublicRoute = ({ children }) => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Protected Dashboard Routes */}
-          <Route
-            path="/assessor/dashboard"
-            element={
-              <ProtectedRoute allowedRoles={['assessor', 'moderator']}>
-                <ModeratorAssessorDashboard />
-              </ProtectedRoute>
-            }
-          />
+   import { AssessorProvider } from './contexts/AssessorContext';
+
+<Route
+  path="/assessor/dashboard"
+  element={
+    <ProtectedRoute allowedRoles={['assessor', 'moderator']}>
+      <AssessorProvider>
+        <ModeratorAssessorDashboard />
+      </AssessorProvider>
+    </ProtectedRoute>
+  }
+/>
+
           <Route
             path="/sdp/dashboard"
             element={

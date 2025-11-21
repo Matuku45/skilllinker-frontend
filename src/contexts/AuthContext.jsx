@@ -1,93 +1,68 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+// In AssessorContext.jsx
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import { useAuth } from './AuthContext';
 
-const AuthContext = createContext();
+const AssessorContext = createContext();
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+export const useAssessor = () => useContext(AssessorContext);
 
-export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+export const AssessorProvider = ({ children }) => {
+  const { currentUser } = useAuth();
+  const [jobs, setJobs] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
+  const [loadingApplications, setLoadingApplications] = useState(false);
 
-  const API_URL = "http://localhost:3000/api/users"; // ⬅️ Your actual backend base URL
+  const apiUrl = 'http://localhost:3000/api';
 
-  // Load stored user on refresh
-  useEffect(() => {
-    const storedUser = localStorage.getItem("skilllinker_user");
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
-
-  // ⭐ LOGIN using your real API
-const login = async (email, password) => {
-  try {
-    const res = await axios.post("http://localhost:3000/api/users/login", {
-      email,
-      password,
-    });
-
-    const { user, token } = res.data;
-
-    // Save user
-    setCurrentUser(user);                 // <-- REQUIRED!!
-    localStorage.setItem("skilllinker_user", JSON.stringify(user));
-    localStorage.setItem("skilllinker_token", token);
-
-    return { success: true, user };
-  } catch (err) {
-    return {
-      success: false,
-      error: err.response?.data?.error || "Login failed",
-    };
-  }
-};
-
-
-  // ⭐ REGISTER using your real API
-  const register = async (userData) => {
+  // Use useCallback to prevent infinite loop
+  const fetchJobs = useCallback(async () => {
+    setLoadingJobs(true);
     try {
-      const res = await axios.post(`${API_URL}/register`, userData);
-
-      const user = res.data.user;
-
-      setCurrentUser(user);
-      localStorage.setItem("skilllinker_user", JSON.stringify(user));
-
-      return { success: true, user };
+      const res = currentUser?.token
+        ? await axios.get(`${apiUrl}/jobs`, { headers: { Authorization: `Bearer ${currentUser.token}` } })
+        : await axios.get(`${apiUrl}/jobs`); // public fetch if no token
+      setJobs(res.data);
     } catch (err) {
-      return {
-        success: false,
-        error: err.response?.data?.message || "Registration failed",
-      };
+      console.error('Error fetching jobs:', err);
+    } finally {
+      setLoadingJobs(false);
     }
-  };
+  }, [currentUser?.token]);
 
-  // ⭐ LOGOUT
-  const logout = () => {
-    setCurrentUser(null);
-    localStorage.removeItem("skilllinker_user");
-  };
+  const fetchApplications = useCallback(async () => {
+    if (!currentUser?.token) return;
+    setLoadingApplications(true);
+    try {
+      const res = await axios.get(`${apiUrl}/applications`, {
+        headers: { Authorization: `Bearer ${currentUser.token}` }
+      });
+      setApplications(res.data);
+    } catch (err) {
+      console.error('Error fetching applications:', err);
+    } finally {
+      setLoadingApplications(false);
+    }
+  }, [currentUser?.token]);
+
+  useEffect(() => {
+    fetchJobs();
+    fetchApplications();
+  }, [fetchJobs, fetchApplications]);
 
   return (
-    <AuthContext.Provider
+    <AssessorContext.Provider
       value={{
-        currentUser,
-        login,
-        register,
-        logout,
-        isAuthenticated: !!currentUser,
-        isLoading,
+        jobs,
+        applications,
+        loadingJobs,
+        loadingApplications,
+        fetchJobs,
+        fetchApplications,
       }}
     >
       {children}
-    </AuthContext.Provider>
+    </AssessorContext.Provider>
   );
 };

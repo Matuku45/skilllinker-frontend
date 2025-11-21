@@ -1,161 +1,184 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useAssessor } from '../../contexts/AssessorContext';
-import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaCheck } from 'react-icons/fa';
-import Profile from './Profile';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useAssessor } from "../../contexts/AssessorContext";
+import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaCheck } from "react-icons/fa";
+import Profile from "./Profile";
 
 const ModeratorAssessorDashboard = () => {
   const { currentUser, logout } = useAuth();
-  const { jobs, applications, loadingJobs, loadingApplications, fetchJobs } = useAssessor();
-  const [activeTab, setActiveTab] = useState('available');
-  const [filteredJobs, setFilteredJobs] = useState([]);
+  const { jobs, loadingJobs, fetchJobs } = useAssessor();
+  const [activeTab, setActiveTab] = useState("profile"); // default tab
 
-  // Filter jobs based on active tab
+  // Fetch jobs for everyone on mount or when currentUser changes
   useEffect(() => {
-    if (activeTab === 'available') {
-      setFilteredJobs(jobs.filter(job => job.status === 'open'));
-    } else if (activeTab === 'assigned') {
-      setFilteredJobs(jobs.filter(job => job.assignedTo?.includes(currentUser.id)));
-    } else {
-      setFilteredJobs([]);
-    }
-  }, [activeTab, jobs, currentUser.id]);
-
-  // Optionally refresh jobs when tab changes
-  useEffect(() => {
-    if (currentUser?.token) {
-      fetchJobs();
-    }
+    fetchJobs();
   }, [currentUser?.token, fetchJobs]);
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <h1 className="text-2xl font-bold text-gray-900">SkillLinker Dashboard</h1>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">
-                Welcome, {currentUser.firstName} {currentUser.lastName}
-              </span>
-              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                currentUser.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-              }`}>
-                {currentUser.verified ? 'Verified' : 'Pending Verification'}
-              </span>
-              <button
-                onClick={logout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+  if (!currentUser) {
+    return <div className="text-center py-12">Loading user...</div>;
+  }
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar with Jobs */}
+      <aside className="w-64 bg-white shadow-md p-4">
+        <h2 className="text-lg font-bold mb-4">Jobs</h2>
+        {loadingJobs ? (
+          <div className="text-gray-500">Loading...</div>
+        ) : jobs.length === 0 ? (
+          <div className="text-gray-400">No jobs found</div>
+        ) : (
+          <ul className="space-y-2">
+            {jobs.map((job) => (
+              <li
+                key={job.id}
+                className="p-2 border rounded hover:bg-gray-100 cursor-pointer"
+              >
+                {job.title}{" "}
+                <span
+                  className={`px-2 py-0.5 text-xs rounded ${
+                    job.status === "open"
+                      ? "bg-green-100 text-green-800"
+                      : job.status === "in-progress"
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {job.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-6">
+        {/* Header */}
+        <header className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">SkillLinker Dashboard</h1>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-700">
+              Welcome, {currentUser.firstName} {currentUser.lastName}
+            </span>
+            <span
+              className={`px-2 py-1 text-xs font-medium rounded-full ${
+                currentUser.verified
+                  ? "bg-green-100 text-green-800"
+                  : "bg-yellow-100 text-yellow-800"
+              }`}
+            >
+              {currentUser.verified ? "Verified" : "Pending Verification"}
+            </span>
+            <button
+              onClick={logout}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Logout
+            </button>
+          </div>
+        </header>
+
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-6">
           <nav className="-mb-px flex space-x-8">
-            {[
-              { id: 'available', name: 'Available Jobs' },
-              { id: 'assigned', name: 'Assigned Jobs' },
-              { id: 'profile', name: 'Profile' }
-            ].map(tab => (
+            {["profile", "jobs"].map((tab) => (
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                key={tab}
+                onClick={() => setActiveTab(tab)}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === tab
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
-                {tab.name}
+                {tab === "profile" ? "Profile" : "All Jobs"}
               </button>
             ))}
           </nav>
         </div>
 
-        {/* Profile Section */}
-        {activeTab === 'profile' && <Profile />}
+        {/* Tab Content */}
+        {activeTab === "profile" && <Profile />}
 
-        {/* Jobs List */}
-        {activeTab !== 'profile' && (
-          <>
-            {(loadingJobs || loadingApplications) ? (
-              <div className="text-center py-12 col-span-full text-gray-500">Loading...</div>
+        {activeTab === "jobs" && (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {loadingJobs ? (
+              <div className="text-center py-12 col-span-full text-gray-500">
+                Loading...
+              </div>
+            ) : jobs.length === 0 ? (
+              <div className="text-center py-12 col-span-full text-gray-400">
+                No jobs found
+              </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredJobs.map(job => (
-                  <div key={job.id} className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="p-6">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-medium text-gray-900">{job.title}</h3>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          job.status === 'open' ? 'bg-green-100 text-green-800' :
-                          job.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {job.status}
-                        </span>
-                      </div>
-                      <p className="mt-2 text-sm text-gray-600">{job.description}</p>
+              jobs.map((job) => (
+                <div key={job.id} className="bg-white overflow-hidden shadow rounded-lg">
+                  <div className="p-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium text-gray-900">{job.title}</h3>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          job.status === "open"
+                            ? "bg-green-100 text-green-800"
+                            : job.status === "in-progress"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {job.status}
+                      </span>
+                    </div>
 
-                      <div className="mt-4 space-y-2">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <FaBriefcase className="mr-2" />
-                          {job.sdpName}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <FaMapMarkerAlt className="mr-2" />
-                          {job.location}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <FaCalendarAlt className="mr-2" />
-                          Deadline: {new Date(job.deadline).toLocaleDateString()}
-                        </div>
-                      </div>
+                    <p className="mt-2 text-sm text-gray-600">{job.description}</p>
 
-                      <div className="mt-4">
-                        <div className="text-sm font-medium text-gray-900 mb-2">Required Qualifications:</div>
-                        <ul className="text-sm text-gray-600 space-y-1">
-                          {job.requiredQualifications.map((qual, index) => (
-                            <li key={index} className="flex items-center">
-                              <FaCheck className="mr-2 text-green-500" />
-                              {qual}
-                            </li>
-                          ))}
-                        </ul>
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <FaBriefcase className="mr-2" />
+                        {job.sdpName}
                       </div>
-
-                      <div className="mt-6 flex items-center justify-between">
-                        <span className="text-lg font-bold text-green-600">R{job.budget.toLocaleString()}</span>
-                        {activeTab === 'assigned' && (
-                          <span className="text-green-600 font-medium">Assigned to you</span>
-                        )}
+                      <div className="flex items-center text-sm text-gray-500">
+                        <FaMapMarkerAlt className="mr-2" />
+                        {job.location}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <FaCalendarAlt className="mr-2" />
+                        Deadline: {new Date(job.deadline).toLocaleDateString()}
                       </div>
                     </div>
-                  </div>
-                ))}
 
-                {filteredJobs.length === 0 && (
-                  <div className="text-center py-12 col-span-full">
-                    <FaBriefcase className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No jobs found</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {activeTab === 'available' ? 'No available jobs at the moment.' :
-                       'No jobs assigned to you yet.'}
-                    </p>
+                    <div className="mt-4">
+                      <div className="text-sm font-medium text-gray-900 mb-2">
+                        Required Qualifications:
+                      </div>
+                      <ul className="text-sm text-gray-600 space-y-1">
+                        {job.requiredQualifications.map((qual, index) => (
+                          <li key={index} className="flex items-center">
+                            <FaCheck className="mr-2 text-green-500" />
+                            {qual}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-between">
+                      <span className="text-lg font-bold text-green-600">
+                        R{job.budget.toLocaleString()}
+                      </span>
+                    </div>
+
+                    {!currentUser?.verified && (
+                      <div className="mt-4 text-sm text-yellow-700">
+                        Verify your account to apply for this job
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              ))
             )}
-          </>
+          </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };
