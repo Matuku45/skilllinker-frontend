@@ -42,60 +42,56 @@ const JobDetails = () => {
   /* =========================================================================
      HANDLE APPLICATION (Upload Resume + Create Application)
   ========================================================================= */
-  const handleApplication = async (resume, coverLetter) => {
-    try {
-      if (!currentUser) {
-        alert("You must be logged in to apply.");
-        return;
-      }
+const handleApplication = async (resume, coverLetter) => {
+  if (!currentUser) {
+    alert("You must be logged in to apply.");
+    return;
+  }
 
-      /* ------------------------------------------
-         STEP 1: Upload Resume
-      ------------------------------------------- */
-      const uploadForm = new FormData();
-      uploadForm.append("userId", currentUser.id);
-      uploadForm.append("description", "Uploaded for job application");
-      uploadForm.append("resume", resume);
+  const uploadForm = new FormData();
+  uploadForm.append("userId", currentUser.id);
+  uploadForm.append("description", "Uploaded for job application");
+  uploadForm.append("resume", resume);
 
-      const resumeUploadRes = await axios.post(
-        "http://localhost:3000/api/resumes/upload",
-        uploadForm,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${currentUser.token}`,
-          },
-        }
-      );
-
-      const uploadedResumeId = resumeUploadRes.data.resume.id;
-
-      /* ------------------------------------------
-         STEP 2: Create Application
-      ------------------------------------------- */
-      await axios.post(
-        "http://localhost:3000/api/applications",
-        {
-          jobId: job.id,
-          userId: currentUser.id,
-          coverLetter,
-          resumeId: uploadedResumeId,
+  try {
+    // Step 1: Upload Resume
+    const resumeUploadRes = await axios.post(
+      "http://localhost:3000/api/resumes/upload",
+      uploadForm,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${currentUser.token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${currentUser.token}`,
-          },
-        }
-      );
+      }
+    );
 
-      alert("Application submitted successfully!");
-      setShowModal(false);
+    const uploadedResumeId = resumeUploadRes.data.resume.id;
 
-    } catch (err) {
-      console.error("Application error:", err.response?.data || err);
-      alert("Failed to submit application. Please try again.");
-    }
-  };
+    // Step 2: Create Application
+    await axios.post(
+      "http://localhost:3000/api/applications",
+      {
+        jobId: job.id,
+        userId: currentUser.id,
+        coverLetter,
+        resumeId: uploadedResumeId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${currentUser.token}`,
+        },
+      }
+    );
+
+    alert("Application submitted successfully!");
+    setShowModal(false);
+
+  } catch (err) {
+    console.error("Application error:", err.response?.data || err);
+    alert("Failed to submit application. Please try again.");
+  }
+};
 
   /* =========================================================================
      UI RENDERING

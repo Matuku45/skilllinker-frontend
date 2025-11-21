@@ -1,35 +1,25 @@
 // Services/application.service.js
 const Application = require('../sqlmodel/models/Application');
 
-class ApplicationService {
-  static async createApplication(data) {
-    return await Application.create(data);
-  }
 
-  static async getAllApplications() {
-    return await Application.findAll({
-      include: ['Job', 'User']
-    });
-  }
+exports.createApplication = async ({ jobId, userId, resumeId, coverLetter }) => {
+  if (!jobId || !userId || !resumeId) throw new Error('jobId, userId, and resumeId are required');
+  
+  return await Application.create({ jobId, userId, resumeId, coverLetter });
+};
 
-  static async getApplicationById(id) {
-    return await Application.findByPk(id, {
-      include: ['Job', 'User']
-    });
-  }
+exports.getAllApplications = async () => {
+  return await Application.findAll();
+};
 
-  static async updateApplicationStatus(id, status) {
-    const application = await Application.findByPk(id);
-    if (!application) throw new Error('Application not found');
-    application.status = status;
-    return await application.save();
-  }
+exports.getApplicationById = async (id) => {
+  return await Application.findByPk(id);
+};
 
-  static async deleteApplication(id) {
-    const application = await Application.findByPk(id);
-    if (!application) throw new Error('Application not found');
-    return await application.destroy();
-  }
-}
+exports.deleteApplication = async (id) => {
+  const app = await Application.findByPk(id);
+  if (!app) throw new Error('Application not found');
+  await app.destroy();
+  return true;
+};
 
-module.exports = ApplicationService;

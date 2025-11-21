@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var multer = require('multer'); // Make sure multer is required
 
 const cors = require('cors');
 
@@ -17,6 +18,7 @@ var messageRouter = require('./routes/message.routes');
 
 var app = express();
 
+// CORS setup
 const allowedOrigins = [
   'http://localhost:5173',
   'https://866c5e8983e9.ngrok-free.app'
@@ -24,7 +26,6 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function(origin, callback){
-    // allow requests with no origin (like mobile apps or curl requests)
     if(!origin) return callback(null, true);
     if(allowedOrigins.indexOf(origin) === -1){
       const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
@@ -37,7 +38,7 @@ app.use(cors({
   credentials: true
 }));
 
-// View engine setup
+// View engine setup (optional if you only return JSON)
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
@@ -48,7 +49,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes with /api prefix
+// Routes
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/jobs', jobRouter);
@@ -58,29 +59,28 @@ app.use('/api/applications', applicationRouter);
 app.use('/api/messages', messageRouter);
 
 // Catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404));
+app.use((req, res, next) => {
+  next(createError(404, 'Route not found'));
 });
 
-// Error handler
-app.use(function (err, req, res, next) {
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-
-// In app.js (after all routes)
+// Global error handler
 app.use((err, req, res, next) => {
+  // Log the full error stack in the console
+  console.error("💥 ERROR:", err);
+
+  // Handle Multer errors separately
   if (err instanceof multer.MulterError) {
-    return res.status(400).json({ message: err.message });
-  } else if (err) {
-    return res.status(500).json({ message: err.message });
+    return res.status(400).json({
+      message: err.message,
+      stack: err.stack
+    });
   }
-  next();
+
+  // Default error response
+  res.status(err.status || 500).json({
+    message: err.message || "Internal Server Error",
+    stack: req.app.get('env') === 'development' ? err.stack : undefined
+  });
 });
-
-
 
 module.exports = app;

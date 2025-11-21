@@ -1,88 +1,48 @@
 const resumeService = require('../Services/resume.services');
 
-/**
- * Upload Resume (BLOB storage)
- */
-exports.uploadResume = async (req, res) => {
+exports.uploadResume = async (req, res, next) => {
   try {
-    // Check if a file was uploaded
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
-    }
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
     const { userId, description } = req.body;
+    if (!userId) return res.status(400).json({ message: 'User ID is required' });
 
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID is required' });
-    }
+    const resume = await resumeService.createResume(userId, req.file, description || "Resume upload");
 
-    // Create resume entry in DB with BLOB data
-    const resume = await resumeService.createResume(
-      userId,
-      req.file, // req.file.buffer exists because we use memoryStorage
-      description || "Resume upload"
-    );
-
-    return res.status(201).json({
-      message: "Resume uploaded successfully",
-      resume,
-    });
-
+    return res.status(201).json({ message: "Resume uploaded successfully", resume });
   } catch (err) {
     console.error("UPLOAD ERROR:", err);
-    return res.status(500).json({
-      message: "Resume upload failed",
-      error: err.message,
-    });
+    next(err); // forward to global error handler
   }
 };
 
-/**
- * Get all resumes
- */
-exports.getAllResumes = async (req, res) => {
+exports.getAllResumes = async (req, res, next) => {
   try {
     const resumes = await resumeService.getAllResumes();
-    return res.status(200).json(resumes);
-
+    res.status(200).json(resumes);
   } catch (err) {
     console.error("GET ALL RESUMES ERROR:", err);
-    return res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-/**
- * Get resume by ID
- */
-exports.getResumeById = async (req, res) => {
+exports.getResumeById = async (req, res, next) => {
   try {
     const resume = await resumeService.getResumeById(req.params.id);
-
-    if (!resume) {
-      return res.status(404).json({ message: "Resume not found" });
-    }
-
-    return res.status(200).json(resume);
-
+    if (!resume) return res.status(404).json({ message: "Resume not found" });
+    res.status(200).json(resume);
   } catch (err) {
     console.error("GET RESUME ERROR:", err);
-    return res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-/**
- * Delete resume
- */
-exports.deleteResume = async (req, res) => {
+exports.deleteResume = async (req, res, next) => {
   try {
     await resumeService.deleteResume(req.params.id);
-
-    return res.status(200).json({
-      message: 'Resume deleted successfully',
-    });
-
+    res.status(200).json({ message: 'Resume deleted successfully' });
   } catch (err) {
     console.error("DELETE RESUME ERROR:", err);
-    return res.status(400).json({ error: err.message });
+    next(err);
   }
 };
