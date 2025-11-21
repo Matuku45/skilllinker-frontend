@@ -1,25 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { FaUser, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 const Profile = () => {
   const { currentUser, resume, uploadResume } = useAuth();
+  const [selectedFile, setSelectedFile] = useState(resume || null);
 
   const handleResumeUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedFile(file);
       uploadResume(file); // Save resume in AuthContext
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!resume) {
+    if (!selectedFile) {
       alert("Please select a resume to upload.");
       return;
     }
-    alert(`Resume uploaded: ${resume.name}`);
+    alert(`Resume uploaded: ${selectedFile.name}`);
   };
+
+  if (!currentUser) {
+    return <div className="text-center py-12">Loading user info...</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded-md mt-6">
@@ -30,7 +36,7 @@ const Profile = () => {
           <h1 className="text-2xl font-bold text-gray-900">
             {currentUser.firstName} {currentUser.lastName}
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className={`text-sm ${currentUser.verified ? 'text-green-600' : 'text-yellow-600'}`}>
             {currentUser.verified ? 'Verified' : 'Pending Verification'}
           </p>
         </div>
@@ -63,8 +69,8 @@ const Profile = () => {
                        file:bg-blue-600 file:text-white
                        hover:file:bg-blue-700"
           />
-          {resume && (
-            <span className="text-gray-700 text-sm">{resume.name}</span>
+          {selectedFile && (
+            <span className="text-gray-700 text-sm">{selectedFile.name}</span>
           )}
           <button
             type="submit"
