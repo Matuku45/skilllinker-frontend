@@ -29,7 +29,7 @@ import JobDetails from './pages/Assessor_Moderator_Dashboard/JobDetails';
 import ModeratorAssessorDashboard from './pages/Assessor_Moderator_Dashboard/Moderator_Assessor_Dashboard';
 import SDS_Dashboard from './pages/Skill_Development_Provider_Dashboard/SDS_Dashboard';
 import AdminDashboard from './pages/Admin_Dashboard/Admin_Dashboard';
-
+import Applications from './pages/Assessor_Moderator_Dashboard/Applications';
 // Components
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -155,6 +155,17 @@ const PublicRoute = ({ children }) => {
     }
   />
 
+  {/* Applications Route */}
+  <Route
+    path="/applications"
+    element={
+      <ProtectedRoute allowedRoles={['assessor', 'moderator']}>
+        <AssessorProvider>
+          <Applications />
+        </AssessorProvider>
+      </ProtectedRoute>
+    }
+  />
 
 
 
