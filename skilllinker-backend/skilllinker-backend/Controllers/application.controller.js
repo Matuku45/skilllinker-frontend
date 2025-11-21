@@ -1,93 +1,112 @@
-const ApplicationService = require('../Services/application.service');
+// Only ApplicationService is required as resume integration is removed
+const ApplicationService = require('../services/application.service');
 
 const ApplicationController = {
-createApplication: async (req, res, next) => {
-try {
-// Log the incoming request body
-console.log("Incoming application data:", req.body);
+  /**
+   * Creates a new application entry (without requiring a resume).
+   */
+  createApplication: async (req, res, next) => {
+    try {
+      // resumeId is removed from destructuring
+      const { jobId, userId, coverLetter } = req.body;
 
-```
-const { jobId, userId, resumeId, coverLetter } = req.body;
+      // Input validation: only jobId and userId are required
+      if (!jobId || !userId) {
+        // 🚨 FRIENDLY, SIMPLE LOGGING FOR MISSING DATA 🚨
+        console.error(`🔴 APPLICATION POST ERROR: Missing required data. Both 'jobId' and 'userId' must be included in the request body.`);
+        // --------------------------------------------------
+        
+        // This is the response sent back to the client (400 Bad Request)
+        return res.status(400).json({ message: "jobId and userId are required" });
+      }
 
-// Validate required fields
-if (!jobId || !userId || !resumeId) {
-  console.warn("Validation failed: missing required fields", req.body);
-  return res.status(400).json({
-    message: "jobId, userId, and resumeId are required",
-    receivedData: req.body,
-  });
-}
+      // ... rest of the successful application creation logic ...
+      const app = await ApplicationService.createApplication({ 
+        jobId, 
+        userId, 
+        coverLetter: coverLetter || "No cover letter provided" 
+      });
 
-// Optional: Type checks
-if (typeof jobId !== "number" || typeof userId !== "number" || typeof resumeId !== "number") {
-  console.warn("Validation failed: incorrect types", req.body);
-  return res.status(400).json({
-    message: "jobId, userId, and resumeId must be numbers",
-    receivedData: req.body,
-  });
-}
+      res.status(201).json({ 
+        message: "Application submitted successfully", 
+        application: app 
+      });
+    } catch (err) {
+      // LOGGING THE FULL ERROR OBJECT: This is for unexpected server errors (500)
+      console.error("CREATE APPLICATION ERROR (Full Details):", err);
+      next(err);
+    }
+  },
 
-const applicationData = {
-  jobId,
-  userId,
-  resumeId,
-  coverLetter: coverLetter || "No cover letter provided",
-};
+  // ... rest of the ApplicationController methods ...
 
-console.log("Sending to ApplicationService:", applicationData);
-
-const app = await ApplicationService.createApplication(applicationData);
-
-return res.status(201).json({ message: "Application created successfully", application: app });
-```
-
-} catch (err) {
-console.error("CREATE APPLICATION ERROR:", err);
-next(err); // Forward to global error handler
-}
-}
-,
-
+  /**
+   * Retrieves all applications.
+   */
   getAllApplications: async (req, res, next) => {
     try {
       const apps = await ApplicationService.getAllApplications();
       res.status(200).json(apps);
     } catch (err) {
-      console.error("GET APPLICATIONS ERROR:", err);
+      // LOGGING THE FULL ERROR OBJECT: This includes the stack trace and specific error details.
+      console.error("GET APPLICATIONS ERROR (Full Details):", err);
       next(err);
     }
   },
 
+  /**
+   * Retrieves an application by its ID.
+   */
   getApplicationById: async (req, res, next) => {
     try {
       const app = await ApplicationService.getApplicationById(req.params.id);
-      if (!app) return res.status(404).json({ message: 'Application not found' });
+      if (!app) {
+        return res.status(404).json({ message: 'Application not found' });
+      }
       res.status(200).json(app);
     } catch (err) {
-      console.error("GET APPLICATION ERROR:", err);
+      // LOGGING THE FULL ERROR OBJECT: This includes the stack trace and specific error details.
+      console.error("GET APPLICATION ERROR (Full Details):", err);
       next(err);
     }
   },
 
+  /**
+   * Updates the status of an existing application.
+   */
   updateApplicationStatus: async (req, res, next) => {
     try {
-      const updatedApp = await ApplicationService.updateApplicationStatus(req.params.id, req.body.status);
-      res.status(200).json(updatedApp);
+      const { status } = req.body;
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+      const updatedApp = await ApplicationService.updateApplicationStatus(req.params.id, status); 
+      res.status(200).json({ 
+        message: "Application status updated", 
+        application: updatedApp 
+      });
     } catch (err) {
-      console.error("UPDATE APPLICATION ERROR:", err);
+      // LOGGING THE FULL ERROR OBJECT: This includes the stack trace and specific error details.
+      console.error("UPDATE APPLICATION ERROR (Full Details):", err);
       next(err);
     }
   },
 
+  /**
+   * Deletes an application by its ID.
+   */
   deleteApplication: async (req, res, next) => {
     try {
       await ApplicationService.deleteApplication(req.params.id);
       res.status(204).send();
     } catch (err) {
-      console.error("DELETE APPLICATION ERROR:", err);
+      // LOGGING THE FULL ERROR OBJECT: This includes the stack trace and specific error details.
+      console.error("DELETE APPLICATION ERROR (Full Details):", err);
       next(err);
     }
   },
+
+  // The handleApplicationUpload method has been removed entirely.
 };
 
 module.exports = ApplicationController;
