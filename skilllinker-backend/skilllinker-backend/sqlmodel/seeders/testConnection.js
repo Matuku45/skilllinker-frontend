@@ -1,26 +1,28 @@
-require('dotenv').config(); // <-- must be first
+require('dotenv').config(); // must be at the very top
+
 const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+  process.env.DB_NAME,       // skilllinker
+  process.env.DB_USER,       // user
+  process.env.DB_PASSWORD,   // 1234
   {
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
+    port: process.env.DB_PORT, 
     dialect: 'mysql',
     logging: false,
   }
 );
 
-(async () => {
+async function testConnection() {
   try {
-    console.log('Connecting as user:', process.env.DB_USER); // <-- debug
     await sequelize.authenticate();
-    console.log('✅ Connection successful');
-  } catch (err) {
-    console.error('❌ Connection failed:', err);
+    console.log('✅ Connection has been established successfully.');
+  } catch (error) {
+    console.error('❌ Unable to connect to the database:', error);
   } finally {
     await sequelize.close();
   }
-})();
+}
+
+testConnection();
