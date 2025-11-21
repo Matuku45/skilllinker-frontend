@@ -19,7 +19,7 @@ import HelperCenter from './pages/Public_Pages/HelperCenter';
 import Login from './pages/Public_Pages/Login';
 import Register from './pages/Public_Pages/Register';
 import ForgotPassword from './pages/Public_Pages/ForgotPassword';
-
+import Notifications from './pages/Skill_Development_Provider_Dashboard/Notifications';
 import { AssessorProvider } from './contexts/AssessorContext';
 // Import Profile
 import Profile from './pages/Assessor_Moderator_Dashboard/Profile';
@@ -133,6 +133,15 @@ const PublicRoute = ({ children }) => {
  <AssessorProvider> <JobDetails />
   </AssessorProvider> </ProtectedRoute> } />
 
+
+<Route    path="/notifications"
+    element={
+      <ProtectedRoute allowedRoles={['sdp']}>
+
+        <Notifications />
+      </ProtectedRoute>
+    }
+  />
 
 
   {/* Profile Route */}

@@ -93,7 +93,7 @@ const Profile = () => {
                        file:rounded-md file:border-0
                        file:text-sm file:font-semibold
                        file:bg-blue-600 file:text-white
-                       hover:file:bg-blue-700"
+                       hover:file:bg-blue-7as00"
           />
           {selectedFile && (
             <span className="text-gray-700 text-sm">{selectedFile.name}</span>
