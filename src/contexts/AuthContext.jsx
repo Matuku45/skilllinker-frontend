@@ -1,68 +1,103 @@
-// In AssessorContext.jsx
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { useAuth } from './AuthContext';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 
-const AssessorContext = createContext();
+const AuthContext = createContext();
 
-export const useAssessor = () => useContext(AssessorContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
 
-export const AssessorProvider = ({ children }) => {
-  const { currentUser } = useAuth();
-  const [jobs, setJobs] = useState([]);
-  const [applications, setApplications] = useState([]);
-  const [loadingJobs, setLoadingJobs] = useState(false);
-  const [loadingApplications, setLoadingApplications] = useState(false);
+export const AuthProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const apiUrl = 'http://localhost:3000/api';
+  const API_URL = "http://localhost:3000/api/users"; // ⬅️ Your actual backend base URL
 
-  // Use useCallback to prevent infinite loop
-  const fetchJobs = useCallback(async () => {
-    setLoadingJobs(true);
-    try {
-      const res = currentUser?.token
-        ? await axios.get(`${apiUrl}/jobs`, { headers: { Authorization: `Bearer ${currentUser.token}` } })
-        : await axios.get(`${apiUrl}/jobs`); // public fetch if no token
-      setJobs(res.data);
-    } catch (err) {
-      console.error('Error fetching jobs:', err);
-    } finally {
-      setLoadingJobs(false);
-    }
-  }, [currentUser?.token]);
-
-  const fetchApplications = useCallback(async () => {
-    if (!currentUser?.token) return;
-    setLoadingApplications(true);
-    try {
-      const res = await axios.get(`${apiUrl}/applications`, {
-        headers: { Authorization: `Bearer ${currentUser.token}` }
-      });
-      setApplications(res.data);
-    } catch (err) {
-      console.error('Error fetching applications:', err);
-    } finally {
-      setLoadingApplications(false);
-    }
-  }, [currentUser?.token]);
-
+  // Load stored user and token on refresh and merge them
   useEffect(() => {
-    fetchJobs();
-    fetchApplications();
-  }, [fetchJobs, fetchApplications]);
+    const storedUser = localStorage.getItem("skilllinker_user");
+    const storedToken = localStorage.getItem("skilllinker_token"); // Get the separately stored token
+
+    if (storedUser && storedToken) {
+      const user = JSON.parse(storedUser);
+      // Merge the token into the user object before setting state
+      setCurrentUser({ ...user, token: storedToken }); 
+    }
+    setIsLoading(false);
+  }, []);
+
+  // ⭐ LOGIN using your real API
+  const login = async (email, password) => {
+    try {
+      const res = await axios.post("http://localhost:3000/api/users/login", {
+        email,
+        password,
+      });
+
+      const { user, token } = res.data;
+      const userWithToken = { ...user, token };
+
+      // Save user (now including the token in the state object)
+      setCurrentUser(userWithToken); 
+      localStorage.setItem("skilllinker_user", JSON.stringify(user));
+      localStorage.setItem("skilllinker_token", token);
+
+      return { success: true, user: userWithToken };
+    } catch (err) {
+      return {
+        success: false,
+        error: err.response?.data?.error || "Login failed",
+      };
+    }
+  };
+
+
+  // ⭐ REGISTER using your real API
+  const register = async (userData) => {
+    try {
+      const res = await axios.post(`${API_URL}/register`, userData);
+
+      const { user, token } = res.data;
+      const userWithToken = { ...user, token };
+
+
+      setCurrentUser(userWithToken);
+      localStorage.setItem("skilllinker_user", JSON.stringify(user));
+      localStorage.setItem("skilllinker_token", token);
+
+
+      return { success: true, user: userWithToken };
+    } catch (err) {
+      return {
+        success: false,
+        error: err.response?.data?.message || "Registration failed",
+      };
+    }
+  };
+
+  // ⭐ LOGOUT
+  const logout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem("skilllinker_user");
+    localStorage.removeItem("skilllinker_token"); // Also remove the token
+  };
 
   return (
-    <AssessorContext.Provider
+    <AuthContext.Provider
       value={{
-        jobs,
-        applications,
-        loadingJobs,
-        loadingApplications,
-        fetchJobs,
-        fetchApplications,
+        currentUser,
+        login,
+        register,
+        logout,
+        isAuthenticated: !!currentUser,
+        isLoading,
       }}
     >
       {children}
-    </AssessorContext.Provider>
+    </AuthContext.Provider>
   );
 };

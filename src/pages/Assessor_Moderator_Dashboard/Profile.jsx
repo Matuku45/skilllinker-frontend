@@ -1,26 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { FaUser, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 const Profile = () => {
   const { currentUser, resume, uploadResume } = useAuth();
-  const [selectedFile, setSelectedFile] = useState(resume || null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [currentResumeName, setCurrentResumeName] = useState('');
 
-  const handleResumeUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      uploadResume(file); // Save resume in AuthContext
+  // Show existing resume if available
+  useEffect(() => {
+    if (resume) {
+      // If resume is a File object, use its name, otherwise show placeholder
+      setCurrentResumeName(resume.name || 'Uploaded file');
     }
+  }, [resume]);
+
+  const handleResumeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) setSelectedFile(file);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedFile) {
-      alert("Please select a resume to upload.");
+      alert('Please select a resume to upload.');
       return;
     }
-    alert(`Resume uploaded: ${selectedFile.name}`);
+
+    setUploading(true);
+    try {
+      const result = await uploadResume(selectedFile);
+      if (result.success) {
+        alert(`Resume uploaded successfully: ${selectedFile.name}`);
+        setCurrentResumeName(selectedFile.name);
+        setSelectedFile(null); // Clear selected file
+      } else {
+        alert(`Upload failed: ${result.error}`);
+      }
+    } catch (err) {
+      alert('An error occurred while uploading.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (!currentUser) {
@@ -36,7 +58,11 @@ const Profile = () => {
           <h1 className="text-2xl font-bold text-gray-900">
             {currentUser.firstName} {currentUser.lastName}
           </h1>
-          <p className={`text-sm ${currentUser.verified ? 'text-green-600' : 'text-yellow-600'}`}>
+          <p
+            className={`text-sm ${
+              currentUser.verified ? 'text-green-600' : 'text-yellow-600'
+            }`}
+          >
             {currentUser.verified ? 'Verified' : 'Pending Verification'}
           </p>
         </div>
@@ -60,8 +86,8 @@ const Profile = () => {
         <div className="flex items-center space-x-4">
           <input
             type="file"
-            accept=".pdf,.doc,.docx"
-            onChange={handleResumeUpload}
+            accept=".pdf,.doc,.docx,.txt,.rtf"
+            onChange={handleResumeChange}
             className="block w-full text-sm text-gray-500
                        file:mr-4 file:py-2 file:px-4
                        file:rounded-md file:border-0
@@ -74,11 +100,17 @@ const Profile = () => {
           )}
           <button
             type="submit"
+            disabled={uploading}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
           >
-            Upload
+            {uploading ? 'Uploading...' : 'Upload'}
           </button>
         </div>
+        {currentResumeName && !selectedFile && (
+          <p className="mt-2 text-sm text-gray-500">
+            Current Resume: {currentResumeName}
+          </p>
+        )}
       </form>
     </div>
   );
