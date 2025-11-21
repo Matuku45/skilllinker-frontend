@@ -19,8 +19,9 @@ var app = express();
 
 const allowedOrigins = [
   'http://localhost:5173',
-  '866c5e8983e9.ngrok-free.app'
+  'https://866c5e8983e9.ngrok-free.app'
 ];
+
 
 app.use(cors({
   origin: function(origin, callback){
