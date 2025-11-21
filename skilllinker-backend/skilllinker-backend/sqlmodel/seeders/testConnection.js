@@ -1,14 +1,13 @@
-require('dotenv').config(); // must be at the very top
-
 const { Sequelize } = require('sequelize');
+require('dotenv').config({ path: '../../.env' }); // relative path from seeders folder
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME,       // skilllinker
-  process.env.DB_USER,       // user
-  process.env.DB_PASSWORD,   // 1234
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT, 
+    port: process.env.DB_PORT,
     dialect: 'mysql',
     logging: false,
   }
