@@ -134,15 +134,16 @@ const PublicRoute = ({ children }) => {
   </AssessorProvider> </ProtectedRoute> } />
 
 
-<Route    path="/notifications"
-    element={
-      <ProtectedRoute allowedRoles={['sdp']}>
-
-        <Notifications />
-      </ProtectedRoute>
-    }
-  />
-
+{/* Notifications Route */}
+        <Route 
+          path="/notifications"
+          element={
+            // FIX 2: Allow 'assessor' and 'moderator' to access this route
+            <ProtectedRoute allowedRoles={['assessor', 'moderator', 'sdp', 'admin']}> 
+              <Notifications />
+            </ProtectedRoute>
+          }
+        />
 
   {/* Profile Route */}
   <Route

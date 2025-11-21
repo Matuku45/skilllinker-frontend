@@ -31,8 +31,7 @@ const mockApplications = [
     { name: "All Jobs", icon: FaBriefcase, link: "#", onClick: (setActiveTab) => setActiveTab("jobs") },
     // ADD THIS NEW ITEM:
     { name: "View Notifications", icon: FaBell, link: "/notifications" }, 
-    { name: "View Reports", icon: FaCheck, link: "/reports" }, 
-    { name: "Settings", icon: FaThLarge, link: "/settings" }, 
+    { name: "View Applications", icon: FaCheck, link: "/applications" }, 
 ];
 
 // Reusable Dropdown Component for Notifications and Applications
