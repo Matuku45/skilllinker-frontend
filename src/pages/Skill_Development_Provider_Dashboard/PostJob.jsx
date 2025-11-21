@@ -29,35 +29,45 @@ const PostJob = () => {
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  if (!currentUser?.token) {
+    alert("You must be logged in to post a job.");
+    return;
+  }
 
-        const jobPayload = {
-            title: formData.title,
-            description: formData.description,
-            location: formData.location,
-            budget: Number(formData.budget),
-            deadline: formData.deadline,
-            sdpId: currentUser.id,
-            requiredQualifications: formData.requiredQualifications
-                .split(",")
-                .map((q) => q.trim())
-        };
+  const jobPayload = {
+    title: formData.title,
+    description: formData.description,
+    location: formData.location,
+    budget: Number(formData.budget),
+    deadline: formData.deadline,
+    sdpId: currentUser.id,
+    requiredQualifications: formData.requiredQualifications
+      .split(",")
+      .map(q => q.trim())
+  };
 
-        try {
-            await axios.post(
-                "http://localhost:3000/api/jobs",
-                jobPayload,
-                { headers: { Authorization: `Bearer ${currentUser.token}` } }
-            );
-
-            navigate("/sdp/dashboard"); // Redirect after creation
-        } catch (error) {
-            console.error("Error creating job:", error);
-            alert("Job posting failed. Check console.");
+  try {
+    await axios.post(
+      "http://localhost:3000/api/jobs",
+      jobPayload,
+      {
+        headers: {
+          Authorization: `Bearer ${currentUser.token}`,
+          "Content-Type": "application/json"
         }
-    };
+      }
+    );
+
+    // ✅ Refresh the dashboard after successful creation
+    navigate("/sdp/dashboard", { replace: true });
+  } catch (error) {
+    console.error("Error creating job:", error.response || error);
+    alert(error.response?.data?.message || "Job posting failed. Check console.");
+  }
+};
 
     return (
         <div className="min-h-screen py-12 px-4 bg-gradient-to-br from-blue-500 to-purple-600">
