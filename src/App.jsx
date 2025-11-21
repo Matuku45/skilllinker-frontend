@@ -24,7 +24,7 @@ import { AssessorProvider } from './contexts/AssessorContext';
 // Import Profile
 import Profile from './pages/Assessor_Moderator_Dashboard/Profile';
 import JobDetails from './pages/Assessor_Moderator_Dashboard/JobDetails';
-
+import Payment from './pages/Assessor_Moderator_Dashboard/Payment';
 // Dashboard Pages
 import ModeratorAssessorDashboard from './pages/Assessor_Moderator_Dashboard/Moderator_Assessor_Dashboard';
 import SDS_Dashboard from './pages/Skill_Development_Provider_Dashboard/SDS_Dashboard';
@@ -166,6 +166,17 @@ const PublicRoute = ({ children }) => {
       </ProtectedRoute>
     }
   />
+
+  {/* Payment Route */}
+  <Route
+    path="/payment"
+    element={
+      <ProtectedRoute allowedRoles={['assessor', 'moderator']}>
+        <Payment />
+      </ProtectedRoute>
+    }
+  />
+  
 
 
 
