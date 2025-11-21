@@ -1,15 +1,52 @@
 const ApplicationService = require('../Services/application.service');
 
 const ApplicationController = {
-  createApplication: async (req, res, next) => {
-    try {
-      const app = await ApplicationService.createApplication(req.body);
-      res.status(201).json(app);
-    } catch (err) {
-      console.error("CREATE APPLICATION ERROR:", err);
-      next(err);
-    }
-  },
+createApplication: async (req, res, next) => {
+try {
+// Log the incoming request body
+console.log("Incoming application data:", req.body);
+
+```
+const { jobId, userId, resumeId, coverLetter } = req.body;
+
+// Validate required fields
+if (!jobId || !userId || !resumeId) {
+  console.warn("Validation failed: missing required fields", req.body);
+  return res.status(400).json({
+    message: "jobId, userId, and resumeId are required",
+    receivedData: req.body,
+  });
+}
+
+// Optional: Type checks
+if (typeof jobId !== "number" || typeof userId !== "number" || typeof resumeId !== "number") {
+  console.warn("Validation failed: incorrect types", req.body);
+  return res.status(400).json({
+    message: "jobId, userId, and resumeId must be numbers",
+    receivedData: req.body,
+  });
+}
+
+const applicationData = {
+  jobId,
+  userId,
+  resumeId,
+  coverLetter: coverLetter || "No cover letter provided",
+};
+
+console.log("Sending to ApplicationService:", applicationData);
+
+const app = await ApplicationService.createApplication(applicationData);
+
+return res.status(201).json({ message: "Application created successfully", application: app });
+```
+
+} catch (err) {
+console.error("CREATE APPLICATION ERROR:", err);
+next(err); // Forward to global error handler
+}
+}
+,
 
   getAllApplications: async (req, res, next) => {
     try {

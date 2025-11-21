@@ -4,15 +4,8 @@ import { mockJobs } from "../../data/mockData";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 
-import {
-  FaBriefcase,
-  FaMapMarkerAlt,
-  FaCalendarAlt,
-  FaCheck,
-} from "react-icons/fa";
-
-import ApplicationModal from "./ApplicationModal"; 
-
+import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaCheck } from "react-icons/fa";
+import ApplicationModal from "./ApplicationModal";
 
 /* =========================================================================
    JOB DETAILS PAGE
@@ -42,56 +35,67 @@ const JobDetails = () => {
   /* =========================================================================
      HANDLE APPLICATION (Upload Resume + Create Application)
   ========================================================================= */
-const handleApplication = async (resume, coverLetter) => {
-  if (!currentUser) {
-    alert("You must be logged in to apply.");
-    return;
-  }
+  const handleApplication = async (resume, coverLetter) => {
+    if (!currentUser) {
+      alert("You must be logged in to apply.");
+      return;
+    }
 
-  const uploadForm = new FormData();
-  uploadForm.append("userId", currentUser.id);
-  uploadForm.append("description", "Uploaded for job application");
-  uploadForm.append("resume", resume);
+    if (!resume) {
+      alert("Please select a resume to upload.");
+      return;
+    }
 
-  try {
-    // Step 1: Upload Resume
-    const resumeUploadRes = await axios.post(
-      "http://localhost:3000/api/resumes/upload",
-      uploadForm,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${currentUser.token}`,
-        },
+    try {
+      // Step 1: Upload Resume
+      const uploadForm = new FormData();
+      uploadForm.append("userId", currentUser.id);
+      uploadForm.append("description", "Uploaded for job application");
+      uploadForm.append("resume", resume);
+
+      const resumeUploadRes = await axios.post(
+        "http://localhost:3000/api/resumes/upload",
+        uploadForm,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${currentUser.token}`,
+          },
+        }
+      );
+
+      const uploadedResumeId = resumeUploadRes.data?.resume?.id;
+      if (!uploadedResumeId) {
+        throw new Error("Resume upload failed. No ID returned.");
       }
-    );
 
-    const uploadedResumeId = resumeUploadRes.data.resume.id;
-
-    // Step 2: Create Application
-    await axios.post(
-      "http://localhost:3000/api/applications",
-      {
-        jobId: job.id,
-        userId: currentUser.id,
-        coverLetter,
-        resumeId: uploadedResumeId,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${currentUser.token}`,
-        },
-      }
-    );
-
-    alert("Application submitted successfully!");
-    setShowModal(false);
-
-  } catch (err) {
-    console.error("Application error:", err.response?.data || err);
-    alert("Failed to submit application. Please try again.");
-  }
+      // Step 2: Create Application
+ // Step 2: Create Application
+const applicationPayload = {
+  jobId: Number(job.id),           // ensure number
+  userId: Number(currentUser.id),  // ensure number
+  resumeId: Number(uploadedResumeId),
+  coverLetter: coverLetter || "No cover letter provided",
 };
+
+
+      await axios.post(
+        "http://localhost:3000/api/applications",
+        applicationPayload,
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+          },
+        }
+      );
+
+      alert("Application submitted successfully!");
+      setShowModal(false);
+    } catch (err) {
+      console.error("Application error:", err.response?.data || err.message || err);
+      alert(`Failed to submit application: ${err.response?.data?.message || err.message}`);
+    }
+  };
 
   /* =========================================================================
      UI RENDERING
@@ -138,8 +142,7 @@ const handleApplication = async (resume, coverLetter) => {
           <div className="flex items-center text-gray-600">
             <FaCalendarAlt className="mr-2 text-purple-500" />
             <span>
-              Deadline:{" "}
-              <strong>{new Date(job.deadline).toLocaleDateString()}</strong>
+              Deadline: <strong>{new Date(job.deadline).toLocaleDateString()}</strong>
             </span>
           </div>
         </div>
@@ -149,7 +152,6 @@ const handleApplication = async (resume, coverLetter) => {
           <h3 className="text-lg font-semibold text-gray-900 mb-3">
             Required Qualifications:
           </h3>
-
           <ul className="space-y-2">
             {job.requiredQualifications.map((qual, index) => (
               <li
@@ -177,9 +179,7 @@ const handleApplication = async (resume, coverLetter) => {
           job={job}
           user={currentUser}
           onClose={() => setShowModal(false)}
-          onSubmit={({ resume, coverLetter }) =>
-            handleApplication(resume, coverLetter)
-          }
+          onSubmit={({ resume, coverLetter }) => handleApplication(resume, coverLetter)}
         />
       )}
     </div>
