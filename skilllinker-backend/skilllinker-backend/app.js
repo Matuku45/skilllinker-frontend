@@ -22,7 +22,7 @@ var app = express();
 const allowedOrigins = [
   'http://localhost:5173',                 // local dev
   'https://skilllinker-frontend.fly.dev', // deployed frontend
-  'https://866c5e8983e9.ngrok-free.app'   // optional ngrok URL
+  'https://bc3ef72e9460.ngrok-free.app'   // optional ngrok URL
 ];
 
 app.use(cors({
