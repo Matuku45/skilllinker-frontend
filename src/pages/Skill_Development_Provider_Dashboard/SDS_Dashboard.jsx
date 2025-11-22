@@ -24,14 +24,17 @@ const loadJobs = async () => {
         const res = await axios.get(`${API_URL}/jobs?ts=${Date.now()}`, {
             headers: { Authorization: `Bearer ${currentUser.token}` },
         });
-        setJobs(res.data); // Show all jobs
+
+        // Filter jobs to only include those posted by the logged-in SDP
+        const myJobs = res.data.filter(job => job.sdpId === currentUser.id);
+
+        setJobs(myJobs); // Show only jobs for this SDP
     } catch (err) {
         console.error("Error loading jobs:", err);
     } finally {
         setLoading(false);
     }
 };
-
 
 
     // Load jobs on mount and whenever the user navigates back to this page
