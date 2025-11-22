@@ -20,9 +20,7 @@ export const AuthProvider = ({ children }) => {
   const [loadingResume, setLoadingResume] = useState(false);
 
   // Set the base API URL
-// Update this in your frontend code
-const API_URL = "https://98fdce96c9a5.ngrok-free.app"; // Remove /api if backend already has it in the route
-
+  const API_URL = "http://localhost:3000/api"; 
 
   // --- Initialization and User Loading ---
   useEffect(() => {

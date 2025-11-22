@@ -18,24 +18,18 @@ var messageRouter = require('./routes/message.routes');
 
 var app = express();
 
-// CORS setup
 const allowedOrigins = [
-  'http://localhost:5173',                 // local dev
-  'https://skilllinker-frontend.fly.dev', // deployed frontend
-  'https://bc3ef72e9460.ngrok-free.app'   // optional ngrok URL
+  'http://localhost:5173',
+  'https://skilllinker-frontend.fly.dev'
 ];
 
+// dynamically allow ngrok URLs
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, Postman)
-    if (!origin) return callback(null, true);
-
-    // Allow requests if the origin is in the whitelist
-    if (allowedOrigins.includes(origin)) {
+    if (!origin) return callback(null, true); // Postman or mobile apps
+    if (allowedOrigins.includes(origin) || origin.includes('.ngrok-free.app')) {
       return callback(null, true);
     }
-
-    // Block requests from unknown origins
     return callback(new Error(`The CORS policy for this site does not allow access from the specified Origin: ${origin}`), false);
   },
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
