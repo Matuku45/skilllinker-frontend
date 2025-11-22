@@ -11,7 +11,7 @@ import Blog from './pages/Public_Pages/Blog';
 import Careers from './pages/Public_Pages/Careers';
 import Events from './pages/Public_Pages/Events';
 import FAQ from './pages/Public_Pages/FAQ';
-import Pricing from './pages/Public_Pages/pRICING.JSX';
+import Pricing from "./pages/Public_Pages/Pricing.jsx";
 import Testimonials from './pages/Public_Pages/Testimonials';
 import PrivacyPolicy from './pages/Public_Pages/PrivacyPolicy';
 import TermsAndConditions from './pages/Public_Pages/TermsAndConditions';
