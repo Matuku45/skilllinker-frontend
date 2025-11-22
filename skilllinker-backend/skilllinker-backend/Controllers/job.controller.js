@@ -1,16 +1,39 @@
-
 const jobService = require('../Services/job.service');
+// 🚨 NEW: Import the broadcast function from the message controller
+const { broadcastJobNotification } = require('../Controllers/message.controller');
 
 module.exports = {
+  /**
+   * Creates a new job and asynchronously triggers the broadcast notification.
+   * POST /api/jobs
+   */
   createJob: async (req, res) => {
+    // Assuming currentUser is set by middleware and contains the job poster's ID and role
+    const sdpId = req.currentUser.id; 
+    
     try {
-      const sdpId = req.currentUser.id; // from authorizeRole, set before
+      // 1. Synchronously save the job (blocking)
       const job = await jobService.createJob(sdpId, req.body);
-      res.status(201).json({ message: 'Job created', job });
+
+      // 2. Asynchronously trigger the message broadcast (NON-BLOCKING)
+      // We do NOT use 'await' here. This ensures the response is sent immediately.
+      broadcastJobNotification(job, sdpId).catch(err => {
+        // Log the error if the background broadcast fails, but let the client response continue.
+        console.error(`🚨 Background message broadcast failed for Job ID ${job.id}:`, err);
+      });
+
+      // 3. Immediately send a success response to the client
+      res.status(201).json({ message: 'Job created and broadcast started', job });
     } catch (err) {
+      // Only handles errors related to job creation/saving
+      console.error("Error creating job:", err);
       res.status(400).json({ error: err.message });
     }
   },
+
+  // -----------------------------------------------------------
+  // Existing functions (no changes needed)
+  // -----------------------------------------------------------
 
   getAllJobs: async (req, res) => {
     try {

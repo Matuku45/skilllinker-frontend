@@ -13,4 +13,5 @@ router.post('/', authenticate, authorizeRole('sdp'), jobController.createJob);
 router.put('/:id', authenticate, authorizeRole('sdp'), jobController.updateJob);
 router.delete('/:id', authenticate, authorizeRole('sdp'), jobController.deleteJob);
 
+
 module.exports = router;

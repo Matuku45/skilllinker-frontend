@@ -1,52 +1,66 @@
-// seedTables.js
-require('dotenv').config({ path: __dirname + '/../../.env' }); // ensure correct .env path
+require('dotenv').config({ path: __dirname + '/../../.env' });
+// In seedPayments.js
+const sequelize = require('../../config/database');
+const Payment = require('../models/Payment');
 
-const sequelize = require('../../config/database'); // Sequelize instance
-const Resume = require('../models/Resume');
-const Application = require('../models/Application');
-
-async function seedTables() {
+async function seedPayments() {
   try {
     // Test DB connection
     await sequelize.authenticate();
     console.log('✅ Database connection successful');
 
-    // Sync models (create or alter tables)
-    await sequelize.sync({ alter: true });
-    console.log('🗄 Tables synced');
+    // Sync Payment table
+    await Payment.sync({ alter: true });
+    console.log('🗄 Payment table synced');
 
-    // Seed a sample Resume
-    const [resume] = await Resume.findOrCreate({
-      where: { filename: 'john_resume.pdf' },
-      defaults: {
-        userId: 1,
-        filename: 'john_resume.pdf',
-        mimetype: 'application/pdf',
-        data: Buffer.from('Sample Resume Data'),
-        description: 'Resume for John Doe',
-      },
-    });
-    console.log('✅ Resume seeded:', resume.filename);
-
-    // Seed a sample Application
-    const [application] = await Application.findOrCreate({
-      where: { userId: 1, jobId: 1, resumeId: resume.id },
-      defaults: {
+    // Seed sample payments
+    const paymentsData = [
+      {
+        payerUserId: 1,
+        payeeUserId: 2,
         jobId: 1,
-        userId: 1,
-        resumeId: resume.id,
-        coverLetter: 'I am very interested in this job.',
+        amount: 5000.00,
+        paymentMethod: 'card',
+        status: 'completed',
+      },
+      {
+        payerUserId: 2,
+        payeeUserId: 1,
+        jobId: 2,
+        amount: 7500.00,
+        paymentMethod: 'paypal',
         status: 'pending',
       },
-    });
-    console.log('✅ Application seeded for userId:', application.userId);
+      {
+        payerUserId: 1,
+        payeeUserId: 3,
+        jobId: null,
+        amount: 1200.50,
+        paymentMethod: 'bank transfer',
+        status: 'refunded',
+      },
+    ];
 
-    console.log('🎉 Seeding completed successfully');
+    for (const payment of paymentsData) {
+      const [record, created] = await Payment.findOrCreate({
+        where: {
+          payerUserId: payment.payerUserId,
+          payeeUserId: payment.payeeUserId,
+          jobId: payment.jobId,
+        },
+        defaults: payment,
+      });
+
+      console.log(`✅ Payment seeded: payerUserId=${record.payerUserId}, payeeUserId=${record.payeeUserId}, amount=${record.amount}`);
+    }
+
+    console.log('🎉 Payment seeding completed successfully');
+
   } catch (err) {
-    console.error('❌ Error seeding tables:', err);
+    console.error('❌ Error seeding payments:', err);
   } finally {
     await sequelize.close();
   }
 }
 
-seedTables();
+seedPayments();

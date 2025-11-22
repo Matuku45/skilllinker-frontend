@@ -1,28 +1,42 @@
-const { Payment, User, Job } = require('../sqlmodel/models');
+// payment.service.js
+// 🚨 FIX: Import the entire database object (db) instead of attempting to destructure the models directly.
+const db = require('../sqlmodel/models'); 
+
+// Access the models via the db object (or re-destructure them from db)
+const Payment = db.Payment;
+const User = db.User;
+const Job = db.Job;
 
 const paymentService = {
   // Create a new payment
   createPayment: async ({ payerUserId, payeeUserId, jobId, amount, paymentMethod }) => {
     const payer = await User.findByPk(payerUserId);
     const payee = await User.findByPk(payeeUserId);
+    
+    // --- User-Friendly Error Messages ---
+    
+    // 1. Payer (Authenticated User) Check
     if (!payer) {
-      throw new Error('Payer not found');
+      throw new Error('Authentication failed. The initiating user account could not be identified.');
     }
+    
+    // 2. Payee (Recipient) Check
     if (!payee) {
-      throw new Error('Payee not found');
+      throw new Error('Payment recipient (Payee) not found. Please verify the Payee ID.');
     }
 
-    // Optional: only allow assessors to create payments
+    // 3. Authorization (Role) Check
     if (payer.userType !== 'assessor') {
-      throw new Error('Only assessors can create payments');
+      throw new Error('Transaction authorization failed. Only users with the Assessor role can initiate payments.');
     }
 
-    // If jobId is provided, check the job exists
+    // 4. Job Existence Check
     if (jobId) {
       const job = await Job.findByPk(jobId);
-      if (!job) throw new Error('Job not found');
+      if (!job) throw new Error('The referenced Job ID was not found.');
     }
 
+    // --- Creation ---
     const payment = await Payment.create({
       payerUserId,
       payeeUserId,
@@ -35,6 +49,19 @@ const paymentService = {
     return payment;
   },
 
+  // Get all payments (Admin Only)
+  getAllPayments: async () => {
+    const payments = await Payment.findAll({
+      include: [
+        { model: User, as: 'payer', attributes: ['id', 'firstName', 'lastName', 'userType'] },
+        { model: User, as: 'payee', attributes: ['id', 'firstName', 'lastName', 'userType'] },
+        { model: Job, attributes: ['id', 'title'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    return payments;
+  },
+
   // Get a payment by its ID
   getPaymentById: async (id) => {
     const payment = await Payment.findByPk(id, {
@@ -44,14 +71,16 @@ const paymentService = {
         { model: Job }
       ]
     });
-    if (!payment) throw new Error('Payment not found');
+    // 5. Payment Existence Check
+    if (!payment) throw new Error('Payment record not found.');
     return payment;
   },
 
   // Admin-only: update the status of a payment
   updatePaymentStatus: async (id, status) => {
     const payment = await Payment.findByPk(id);
-    if (!payment) throw new Error('Payment not found');
+    // 6. Payment Existence Check
+    if (!payment) throw new Error('Payment record not found.');
     payment.status = status;
     await payment.save();
     return payment;
@@ -60,7 +89,8 @@ const paymentService = {
   // Admin-only: delete payment
   deletePayment: async (id) => {
     const payment = await Payment.findByPk(id);
-    if (!payment) throw new Error('Payment not found');
+    // 7. Payment Existence Check
+    if (!payment) throw new Error('Payment record not found.');
     await payment.destroy();
     return;
   }

@@ -130,21 +130,9 @@ const Profile = () => {
                             bgcolor: 'secondary.main', // A nice accent color
                             fontSize: '2.5rem'
                         }}>
-                            {profileData.firstName ? profileData.firstName[0].toUpperCase() : 'U'}
+                    {profileData.firstName ? profileData.firstName[0].toUpperCase() : 'U'}
                         </Avatar>
-                        
-                        {/* CHANGE AVATAR BUTTON - Styled */}
-                        <Button 
-                            variant="contained" 
-                            color="secondary" 
-                            size="medium"
-                            startIcon={<CameraAltIcon />}
-                            sx={{ mt: -2, zIndex: 1, textTransform: 'none' }} // Float button slightly
-                        >
-                            Upload Photo
-                        </Button>
-
-                        {/* User Type Display */}
+                   {/* User Type Display */}
                         <Typography variant="subtitle1" color="text.secondary" sx={{ mt: 2 }}>
                             Account Type: **{profileData.userType}**
                         </Typography>
@@ -216,24 +204,6 @@ const Profile = () => {
                         />
                     </Grid>
 
-                    {/* Phone Number */}
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            fullWidth
-                            label="Phone Number"
-                            name="phone"
-                            value={profileData.phone}
-                            onChange={handleChange}
-                            variant="outlined"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PhoneIcon color="action" />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid>
 
                     {/* --- Status & Submit --- */}
                     <Grid item xs={12}>

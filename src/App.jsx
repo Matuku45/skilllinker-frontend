@@ -29,13 +29,14 @@ import Payment from './pages/Assessor_Moderator_Dashboard/Payment';
 import ModeratorAssessorDashboard from './pages/Assessor_Moderator_Dashboard/Moderator_Assessor_Dashboard';
 import SDS_Dashboard from './pages/Skill_Development_Provider_Dashboard/SDS_Dashboard';
 import AdminDashboard from './pages/Admin_Dashboard/Admin_Dashboard';
-import Applications from './pages/Assessor_Moderator_Dashboard/Applications';
+import Applications from './pages/Assessor_Moderator_Dashboard/Applications'; // Assessor/Moderator View
 import Profile3 from './pages/Skill_Development_Provider_Dashboard/Profile';
 // Components
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Applications2 from './pages/Skill_Development_Provider_Dashboard/Applications';
+import Applications2 from './pages/Skill_Development_Provider_Dashboard/Applications'; // SDP View
 import PostJob from './pages/Skill_Development_Provider_Dashboard/PostJob';
+
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -54,14 +55,6 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
-// App Wrapper to conditionally render Header
-const AppWrapper = () => {
-  const location = useLocation();
-
-  // Hide header for all dashboard routes
-  const hideHeaderRoutes = ['/admin', '/sdp', '/assessor'];
-  const hideHeader = hideHeaderRoutes.some((path) => location.pathname.startsWith(path));
-
 // Public Route Component (redirects authenticated users)
 const PublicRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -69,9 +62,17 @@ const PublicRoute = ({ children }) => {
     // Redirect authenticated users to their dashboard
     return <Navigate to="/assessor/dashboard" replace />;
   }
-  return children;
+  return children; // Explicitly return children if not authenticated
 };
 
+
+// App Wrapper to conditionally render Header
+const AppWrapper = () => {
+  const location = useLocation();
+
+  // Hide header for all dashboard routes
+  const hideHeaderRoutes = ['/admin', '/sdp', '/assessor'];
+  const hideHeader = hideHeaderRoutes.some((path) => location.pathname.startsWith(path));
 
   return (
     <>
@@ -94,9 +95,9 @@ const PublicRoute = ({ children }) => {
           <Route path="/helper-center" element={<HelperCenter />} />
 
           {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
 
           {/* Protected Dashboard Routes */}
    <Route
@@ -177,7 +178,7 @@ const PublicRoute = ({ children }) => {
   />
   
 
-  {/* Applications Route for SDP */}
+  {/* Applications Route for SDP (Uses Applications2, which has the fix) */}
   <Route
     path="/sdp/applications"      
     element={
@@ -188,7 +189,7 @@ const PublicRoute = ({ children }) => {
   />  
 
 
-  {/* Profile Route for SDP **<-- ADDED THIS ROUTE** */}
+  {/* Profile Route for SDP */}
   <Route
     path="/sdp/profile" 
     element={
@@ -202,18 +203,15 @@ const PublicRoute = ({ children }) => {
 
 {/* Post Job Route (SDP Only) */}
 <Route
-  path="/sdp/post-job"
-  element={
-    <ProtectedRoute allowedRoles={['sdp']}>
-      <PostJob />
-    </ProtectedRoute>
-  }
+  path="/sdp/post-job"
+  element={
+    <ProtectedRoute allowedRoles={['sdp']}>
+      <PostJob />
+    </ProtectedRoute>
+  }
 />
 
-           
-
-
-
+           
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

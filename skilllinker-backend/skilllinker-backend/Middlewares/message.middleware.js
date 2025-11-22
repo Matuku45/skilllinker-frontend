@@ -1,8 +1,11 @@
+// Middlewares/message.middleware.js
+
 const { body, validationResult } = require('express-validator');
 
 exports.validateMessage = [
-  body('fromUserId').isInt().withMessage('Sender ID must be an integer'),
-  body('toUserId').isInt().withMessage('Recipient ID must be an integer'),
+  // FIX: Add .toInt() to safely convert string-integers from JSON body
+  body('fromUserId').toInt().isInt().withMessage('Sender ID must be an integer'),
+  body('toUserId').toInt().isInt().withMessage('Recipient ID must be an integer'),
   body('content').notEmpty().withMessage('Message content cannot be empty'),
   
   (req, res, next) => {

@@ -1,11 +1,15 @@
 const paymentService = require('../services/payment.service');
 
 module.exports = {
-  // POST /payments — create a payment
+  /**
+   * Creates a new payment.
+   * POST /payments
+   */
   create: async (req, res) => {
     try {
       const { payeeUserId, jobId, amount, paymentMethod } = req.body;
-      const payerUserId = req.user.id;  // from authenticate
+      const payerUserId = req.user.id;  // Assumed to be set by authentication middleware
+      
       const payment = await paymentService.createPayment({
         payerUserId,
         payeeUserId,
@@ -13,43 +17,86 @@ module.exports = {
         amount,
         paymentMethod
       });
-      res.status(201).json({ message: 'Payment created', payment });
+      
+      // Updated success message
+      res.status(201).json({ message: 'Payment created successfully.', payment });
+      
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      const errorMessage = err.message;
+      let statusCode = 400; // Default to Bad Request for general validation errors
+      
+      // Map user-friendly service errors to appropriate HTTP status codes
+      if (errorMessage.includes('Authentication failed')) {
+        statusCode = 401; // Unauthorized: User ID not found or session invalid
+      } else if (errorMessage.includes('Transaction authorization failed')) {
+        statusCode = 403; // Forbidden: User role (not 'assessor') is incorrect
+      } else if (errorMessage.includes('not found') || errorMessage.includes('The referenced Job ID')) {
+        statusCode = 404; // Not Found: Resource ID (Payee or Job) in payload is invalid
+      }
+      
+      // Return a standardized error object
+      res.status(statusCode).json({ 
+        error: 'Payment initiation failed.', 
+        details: errorMessage // Provides the user-friendly message
+      });
     }
   },
 
-  // GET /payments/:id — view a payment (admin only)
+  /**
+   * Retrieves all payment records.
+   * GET /payments
+   */
+  getAll: async (req, res) => {
+    try {
+      const payments = await paymentService.getAllPayments();
+      res.json(payments);
+    } catch (err) {
+      // Use 500 for server-side error if the service failed
+      res.status(500).json({ error: 'Failed to retrieve payment records.', details: err.message });
+    }
+  },
+
+  /**
+   * Retrieves a single payment record by ID.
+   * GET /payments/:id
+   */
   getById: async (req, res) => {
     try {
       const id = req.params.id;
       const payment = await paymentService.getPaymentById(id);
       res.json(payment);
     } catch (err) {
-      res.status(404).json({ error: err.message });
+      // Assuming service throws 'Payment record not found.'
+      res.status(404).json({ error: 'Payment lookup failed.', details: err.message });
     }
   },
 
-  // PUT /payments/:id/status — update payment status (admin only)
+  /**
+   * Updates the status of a payment.
+   * PUT /payments/:id/status
+   */
   updateStatus: async (req, res) => {
     try {
       const id = req.params.id;
       const { status } = req.body;
       const updated = await paymentService.updatePaymentStatus(id, status);
-      res.json({ message: 'Payment status updated', updated });
+      res.json({ message: 'Payment status updated successfully.', updated });
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      res.status(400).json({ error: 'Failed to update payment status.', details: err.message });
     }
   },
 
-  // DELETE /payments/:id — delete a payment (admin only)
+  /**
+   * Deletes a payment record.
+   * DELETE /payments/:id
+   */
   delete: async (req, res) => {
     try {
       const id = req.params.id;
       await paymentService.deletePayment(id);
-      res.json({ message: 'Payment deleted' });
+      res.json({ message: 'Payment record deleted successfully.' });
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      res.status(400).json({ error: 'Failed to delete payment record.', details: err.message });
     }
   }
 };
