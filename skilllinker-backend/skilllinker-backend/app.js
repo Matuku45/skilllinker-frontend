@@ -64,6 +64,17 @@ app.use('/api/resumes', resumeRouter);
 app.use('/api/applications', applicationRouter);
 app.use('/api/messages', messageRouter);
 
+
+// Root route for testing via ngrok
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Backend is running!' });
+});
+
+// Catch 404 and forward to error handler
+app.use((req, res, next) => {
+  next(createError(404, 'Route not found'));
+});
+
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
   next(createError(404, 'Route not found'));
@@ -88,5 +99,7 @@ app.use((err, req, res, next) => {
     stack: req.app.get('env') === 'development' ? err.stack : undefined
   });
 });
+
+
 
 module.exports = app;
