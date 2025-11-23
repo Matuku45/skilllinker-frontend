@@ -4,7 +4,7 @@ import { FaUsers, FaBriefcase, FaCheckCircle } from "react-icons/fa";
 import { Fade, Bounce } from "react-awesome-reveal";
 
 // Local images
-import heroImage from '../../assets/skillbuilder1.webp';
+import heroImage from '../../assets/skillbuilder1.jpg';
 import featureImg1 from '../../assets/job1.webp';
 import featureImg2 from '../../assets/job2.webp';
 import featureImg3 from '../../assets/mining-technology.webp';

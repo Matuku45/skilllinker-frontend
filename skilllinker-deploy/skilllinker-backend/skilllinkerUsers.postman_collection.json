@@ -1,0 +1,193 @@
+{
+  "info": {
+    "name": "Skilllinker API (Full CRUD + Auth)",
+    "_postman_id": "d1234567-89ab-4cde-9012-3456789abcde",
+    "description": "Complete Postman collection for Skilllinker Users, Jobs, Payments, Applications, Messages, and Resumes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "http://localhost:3000/api/users/register", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","users","register"] },
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"123456\",\n  \"userType\": \"assessor\"\n}" }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "http://localhost:3000/api/users/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","users","login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"123456\"\n}" }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/users", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","users"] } }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "http://localhost:3000/api/users/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","users","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Jane\"\n}" }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/users/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","users","1"] } }
+        }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "Get All Jobs",
+          "request": { "method": "GET", "url": { "raw": "http://localhost:3000/api/jobs", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","jobs"] } }
+        },
+        {
+          "name": "Get Job By ID",
+          "request": { "method": "GET", "url": { "raw": "http://localhost:3000/api/jobs/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","jobs","1"] } }
+        },
+        {
+          "name": "Create Job",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "http://localhost:3000/api/jobs", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","jobs"] },
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Frontend Developer\",\n  \"description\": \"Build UI components\",\n  \"location\": \"Remote\"\n}" }
+          }
+        },
+        {
+          "name": "Update Job",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "http://localhost:3000/api/jobs/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","jobs","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated Title\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Job",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/jobs/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","jobs","1"] } }
+        }
+      ]
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "Create Application",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "http://localhost:3000/api/applications", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","applications"] },
+            "body": { "mode": "raw", "raw": "{\n  \"jobId\": 1,\n  \"coverLetter\": \"I am interested in this job\"\n}" }
+          }
+        },
+        {
+          "name": "Get All Applications",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/applications", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","applications"] } }
+        },
+        {
+          "name": "Get Application By ID",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/applications/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","applications","1"] } }
+        },
+        {
+          "name": "Update Application Status",
+          "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": { "raw": "http://localhost:3000/api/applications/1/status", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","applications","1","status"] }, "body": { "mode": "raw", "raw": "{\n  \"status\": \"approved\"\n}" } }
+        },
+        {
+          "name": "Delete Application",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/applications/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","applications","1"] } }
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "http://localhost:3000/api/messages", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","messages"] },
+            "body": { "mode": "raw", "raw": "{\n  \"toUserId\": 2,\n  \"jobId\": 1,\n  \"content\": \"Hello, I am interested in this job\"\n}" }
+          }
+        },
+        {
+          "name": "Get User Messages",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/messages/user/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","messages","user","1"] } }
+        },
+        {
+          "name": "Mark Message as Read",
+          "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/messages/1/read", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","messages","1","read"] } }
+        },
+        {
+          "name": "Get Job Messages",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/messages/job/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","messages","job","1"] } }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "http://localhost:3000/api/payments", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","payments"] },
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 1000,\n  \"jobId\": 1\n}" }
+          }
+        },
+        {
+          "name": "Get Payment by ID",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/payments/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","payments","1"] } }
+        },
+        {
+          "name": "Update Payment Status",
+          "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": { "raw": "http://localhost:3000/api/payments/1/status", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","payments","1","status"] }, "body": { "mode": "raw", "raw": "{\n  \"status\": \"completed\"\n}" } }
+        },
+        {
+          "name": "Delete Payment",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/payments/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","payments","1"] } }
+        }
+      ]
+    },
+    {
+      "name": "Resumes",
+      "item": [
+        {
+          "name": "Upload Resume",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "http://localhost:3000/api/resumes/upload", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","resumes","upload"] },
+            "body": { "mode": "formdata", "formdata": [{ "key": "resume", "type": "file", "src": "/path/to/resume.pdf" }] }
+          }
+        },
+        {
+          "name": "Get All Resumes",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/resumes", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","resumes"] } }
+        },
+        {
+          "name": "Get Resume by ID",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/resumes/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","resumes","1"] } }
+        },
+        {
+          "name": "Delete Resume",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:3000/api/resumes/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","resumes","1"] } }
+        }
+      ]
+    }
+  ]
+}

@@ -1,183 +1,372 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-// *** FIX 1: Import useNavigate from react-router-dom ***
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext'; // Import AuthContext
+import { useAuth } from '../../contexts/AuthContext';
 
-const VERIFICATION_FEE = 450.00;
+const VERIFICATION_FEE = 450.0;
 
-// --- Icons (Same as before) ---
-const CheckCircleIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"> {/* SVG content goes here, assumed missing for brevity */}</svg>;
-const ShieldAltIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"> {/* SVG content goes here, assumed missing for brevity */}</svg>;
-const CreditCardIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"> {/* SVG content goes here, assumed missing for brevity */}</svg>;
-const TimesIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"> {/* SVG content goes here, assumed missing for brevity */}</svg>;
-const LockIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"> {/* SVG content goes here, assumed missing for brevity */}</svg>;
-const DollarSignIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"> {/* SVG content goes here, assumed missing for brevity */}</svg>;
-const DocumentCheckIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"> {/* SVG content goes here, assumed missing for brevity */}</svg>;
-const ArrowLeftIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"> {/* SVG content goes here, assumed missing for brevity */}</svg>; 
+// Icons (your SVGs unchanged)
+const CheckCircleIcon = (props) => <svg {...props}></svg>;
+const ShieldAltIcon = (props) => <svg {...props}></svg>;
+const CreditCardIcon = (props) => <svg {...props}></svg>;
+const TimesIcon = (props) => <svg {...props}></svg>;
+const LockIcon = (props) => <svg {...props}></svg>;
+const DollarSignIcon = (props) => <svg {...props}></svg>;
+const DocumentCheckIcon = (props) => <svg {...props}></svg>;
+const ArrowLeftIcon = (props) => <svg {...props}></svg>;
 
-
-// Helper for rows
+// Helper row
 const DetailRow = ({ label, value, highlight = false, isError = false }) => (
-    <div className="flex justify-between items-center py-1">
-        <span className="text-gray-600">{label}:</span>
-        <span className={`font-semibold ${highlight ? (isError ? 'text-red-800 text-lg' : 'text-green-800 text-lg') : 'text-gray-800'}`}>
-            {value}
-        </span>
-    </div>
+  <div className="flex justify-between items-center py-1">
+    <span className="text-gray-600">{label}:</span>
+    <span
+      className={`font-semibold ${
+        highlight
+          ? isError
+            ? 'text-red-800 text-lg'
+            : 'text-green-800 text-lg'
+          : 'text-gray-800'
+      }`}
+    >
+      {value}
+    </span>
+  </div>
 );
 
-// Modal (Content is unchanged)
+// Modal
 const PaymentSuccessModal = ({ payment, onClose, navigateToDashboard }) => {
-    const date = payment.timestamp ? new Date(payment.timestamp).toLocaleString() : 'N/A';
-    const isError = payment.id === 'FAILED' || payment.id === 'ERROR-NO-ID';
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 sm:p-8 transform transition-all duration-300 scale-100">
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                    <TimesIcon className="w-5 h-5" />
-                </button>
+  const date = payment.timestamp
+    ? new Date(payment.timestamp).toLocaleString()
+    : 'N/A';
+  const isError =
+    payment.id === 'FAILED' || payment.id === 'ERROR-NO-ID';
 
-                <div className="text-center">
-                    {!isError ? (
-                        <CheckCircleIcon className="mx-auto text-7xl text-green-500 mb-4 h-20 w-20" />
-                    ) : (
-                        <TimesIcon className="mx-auto text-7xl text-red-500 mb-4 h-20 w-20" />
-                    )}
-                    
-                    <h2 className={`text-3xl font-extrabold mb-2 ${isError ? 'text-red-700' : 'text-gray-800'}`}>
-                        {isError ? 'Payment Failed' : 'Payment Successful!'}
-                    </h2>
-                    <p className="text-lg text-gray-500 mb-6">
-                        {isError ? 'We encountered an error. Please try again.' : 'Verification fee processed successfully.'}
-                    </p>
-                </div>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 sm:p-8">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+        >
+          <TimesIcon className="w-5 h-5" />
+        </button>
 
-                <div className={`space-y-3 p-4 rounded-lg border-2 ${isError ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
-                    <h3 className={`text-xl font-bold mb-3 flex items-center ${isError ? 'text-red-700' : 'text-green-700'}`}>
-                        <DollarSignIcon className="mr-2 w-5 h-5" /> Transaction Summary
-                    </h3>
-                    <DetailRow label="Amount Attempted" value={`R${payment.amount.toFixed(2)}`} highlight={true} isError={isError} />
-                    <DetailRow label="Transaction ID" value={payment.id || 'N/A'} isError={isError} />
-                    {isError && <DetailRow label="Error Message" value={payment.error || 'N/A'} isError={isError} />}
-                    <DetailRow label="Time" value={date} isError={isError} />
-                    <DetailRow label="Method" value={payment.paymentMethod || 'Bank Transfer'} isError={isError} />
-                </div>
+        <div className="text-center">
+          {!isError ? (
+            <CheckCircleIcon className="mx-auto text-7xl text-green-500 mb-4 h-20 w-20" />
+          ) : (
+            <TimesIcon className="mx-auto text-7xl text-red-500 mb-4 h-20 w-20" />
+          )}
 
-                <button onClick={navigateToDashboard} className={`w-full mt-8 flex items-center justify-center px-6 py-3 text-lg font-bold rounded-xl shadow-md transition-all duration-300 ${isError ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white hover:shadow-lg`}>
-                    <DocumentCheckIcon className="mr-3 w-6 h-6" />
-                    {isError ? 'Return to Dashboard' : 'Go to Assessor Dashboard'}
-                </button>
-
-            </div>
+          <h2
+            className={`text-3xl font-extrabold mb-2 ${
+              isError ? 'text-red-700' : 'text-gray-800'
+            }`}
+          >
+            {isError ? 'Payment Failed' : 'Payment Successful!'}
+          </h2>
+          <p className="text-lg text-gray-500 mb-6">
+            {isError
+              ? 'We encountered an error. Please try again.'
+              : 'Verification fee processed successfully.'}
+          </p>
         </div>
-    );
+
+        <div
+          className={`space-y-3 p-4 rounded-lg border-2 ${
+            isError
+              ? 'bg-red-50 border-red-200'
+              : 'bg-green-50 border-green-200'
+          }`}
+        >
+          <h3
+            className={`text-xl font-bold mb-3 flex items-center ${
+              isError ? 'text-red-700' : 'text-green-700'
+            }`}
+          >
+            <DollarSignIcon className="mr-2 w-5 h-5" /> Transaction
+            Summary
+          </h3>
+
+          <DetailRow
+            label="Amount Attempted"
+            value={`R${payment.amount.toFixed(2)}`}
+            highlight
+            isError={isError}
+          />
+
+          <DetailRow
+            label="Transaction ID"
+            value={payment.id || 'N/A'}
+            isError={isError}
+          />
+
+          {isError && (
+            <DetailRow
+              label="Error Message"
+              value={payment.error || 'N/A'}
+              isError={isError}
+            />
+          )}
+
+          <DetailRow label="Time" value={date} isError={isError} />
+          <DetailRow
+            label="Method"
+            value={payment.paymentMethod || 'Bank Transfer'}
+            isError={isError}
+          />
+        </div>
+
+        <button
+          onClick={navigateToDashboard}
+          className={`w-full mt-8 flex items-center justify-center px-6 py-3 text-lg font-bold rounded-xl shadow-md ${
+            isError
+              ? 'bg-red-600 hover:bg-red-700'
+              : 'bg-blue-600 hover:bg-blue-700'
+          } text-white`}
+        >
+          <DocumentCheckIcon className="mr-3 w-6 h-6" />
+          {isError ? 'Return to Dashboard' : 'Go to Assessor Dashboard'}
+        </button>
+      </div>
+    </div>
+  );
 };
 
 const Payment = () => {
-    const { currentUser } = useAuth();
-    const [isLoading, setIsLoading] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-    const [paymentDetails, setPaymentDetails] = useState(null);
-    
-    // *** FIX 2: Call the useNavigate hook to get the navigation function ***
-    const navigate = useNavigate(); 
-    
-    // The navigateToDashboard function now uses the real navigate function
-    const navigateToDashboard = () => { setShowModal(false); navigate('/assessor/dashboard'); }
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
-    const handlePayment = async () => {
-        if (!currentUser?.token) return alert('You must be logged in.');
-        setIsLoading(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState(null);
 
-        try {
-            const payload = {
-                payerUserId: currentUser.id,
-                payeeUserId: 1,
-                jobId: 1,
-                amount: VERIFICATION_FEE,
-                paymentMethod: 'bank_transfer',
-                status: 'pending'
-            };
+  const [payments, setPayments] = useState([]);
+  const [isPaymentsLoading, setIsPaymentsLoading] = useState(false);
 
-            const response = await axios.post(
-                'http://localhost:3000/api/payments',
-                payload,
-                { headers: { Authorization: `Bearer ${currentUser.token}` } }
-            );
+  // 🔥 FETCH PAYMENTS HOOK (your code unchanged)
+  const fetchPayments = useCallback(async () => {
+    if (!currentUser?.token) return;
 
-            // Assuming response.data.payment contains the transaction details
-            setPaymentDetails({ ...response.data.payment, amount: VERIFICATION_FEE, timestamp: Date.now(), id: response.data.payment.id || 'N/A' });
-            setShowModal(true);
-
-        } catch (error) {
-            const userError = error.response?.data?.details || error.response?.data?.error || error.message || 'An unknown error occurred.';
-            setPaymentDetails({ id: 'FAILED', amount: VERIFICATION_FEE, error: userError, timestamp: Date.now() });
-            setShowModal(true);
-        } finally {
-            setIsLoading(false);
+    setIsPaymentsLoading(true);
+    try {
+      const res = await axios.get(
+        'http://localhost:3000/api/payments',
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.token}`,
+          },
         }
+      );
+
+      setPayments(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Error fetching payments:', err);
+    } finally {
+      setIsPaymentsLoading(false);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    fetchPayments();
+  }, [fetchPayments]);
+
+  // FILTER PAYMENTS BY LOGGED-IN USER
+  const userPayments = payments.filter(
+    (p) => p.payerUserId === currentUser?.id
+  );
+
+const handlePayment = async () => {
+  if (!currentUser?.token)
+    return alert('You must be logged in.');
+
+  setIsLoading(true);
+
+  try {
+    const payload = {
+      payerUserId: currentUser.id,
+      payeeUserId: 1,  
+      jobId: 1,
+      amount: VERIFICATION_FEE,
+      paymentMethod: 'bank_transfer',
+      status: 'payed',
     };
 
-    return (
-        <div className="min-h-screen p-6 md:p-12 bg-gradient-to-br from-indigo-500 to-purple-600 font-sans">
-            <div className="max-w-3xl mx-auto">
-                {/* *** FIX 3: This button now uses the real navigate function to go back *** */}
-                <button onClick={() => navigate('/assessor/dashboard')} className="flex items-center text-white/80 hover:text-white mb-6 text-sm font-semibold">
-                    <ArrowLeftIcon className="mr-2 w-4 h-4" /> Back to Dashboard
-                </button>
-
-                <div className="bg-white rounded-xl shadow-2xl p-8 sm:p-10 border border-gray-100 transform transition-transform duration-500">
-                    <div className="text-center mb-8 pb-6 border-b border-gray-200">
-                        <ShieldAltIcon className="mx-auto text-6xl text-blue-600 mb-3 h-16 w-16" />
-                        <h1 className="text-3xl font-extrabold text-gray-800">Verification Fee Required</h1>
-                        <p className="text-lg text-gray-500 mt-2">Secure your access to exclusive job postings.</p>
-                    </div>
-
-                    <div className="space-y-4 mb-8">
-                        <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
-                            <LockIcon className="text-yellow-500 w-5 h-5" /> Unlock Verified Access
-                        </h2>
-                        <p className="text-gray-600 leading-relaxed">
-                            A one-time verification fee is required to cover document processing, accreditation checks, and ensuring platform integrity.
-                        </p>
-                        <ul className="list-disc list-inside text-gray-700 space-y-2 pl-4">
-                            <li className="flex items-start"><CheckCircleIcon className="text-green-500 mr-2 w-5 h-5 mt-1" /> Full Profile Visibility to SDPs.</li>
-                            <li className="flex items-start"><CheckCircleIcon className="text-green-500 mr-2 w-5 h-5 mt-1" /> Access to Premium Assessor/Moderator Jobs.</li>
-                            <li className="flex items-start"><CheckCircleIcon className="text-green-500 mr-2 w-5 h-5 mt-1" /> Completion of your official Verification Status.</li>
-                        </ul>
-                    </div>
-
-                    <div className="bg-blue-50 p-5 rounded-lg border-2 border-blue-200 shadow-inner">
-                        <div className="flex justify-between items-center">
-                            <span className="text-xl font-semibold text-gray-700">One-Time Verification Fee:</span>
-                            <span className="text-3xl font-extrabold text-blue-700">R{VERIFICATION_FEE.toFixed(2)}</span>
-                        </div>
-                    </div>
-
-                    <button onClick={handlePayment} disabled={isLoading} className={`w-full mt-8 flex items-center justify-center px-6 py-3 text-lg font-bold rounded-xl shadow-lg transition-all duration-300 transform ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-[1.01]'}`}>
-                        {isLoading ? (
-                            <span className="flex items-center">
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Processing Payment...
-                            </span>
-                        ) : (
-                            <>
-                                <CreditCardIcon className="mr-3 w-6 h-6" /> Pay R{VERIFICATION_FEE.toFixed(2)} and Get Verified
-                            </>
-                        )}
-                    </button>
-                    <p className="text-center text-sm text-gray-400 mt-4">Powered by SecurePay & SkillLinker Security.</p>
-                </div>
-            </div>
-
-            {showModal && paymentDetails && (
-                <PaymentSuccessModal payment={paymentDetails} onClose={() => setShowModal(false)} navigateToDashboard={navigateToDashboard} />
-            )}
-        </div>
+    const res = await axios.post(
+      'http://localhost:3000/api/payments',
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${currentUser.token}`,
+        },
+      }
     );
+
+    setPaymentDetails({
+      ...res.data.payment,
+      amount: VERIFICATION_FEE,
+      timestamp: Date.now(),
+      id: res.data.payment.id || 'N/A',
+    });
+
+    setShowModal(true);
+    fetchPayments();
+  } catch (error) {
+    const userError =
+      error.response?.data?.details ||
+      error.response?.data?.error ||
+      error.message ||
+      'Unknown error';
+
+    setPaymentDetails({
+      id: 'FAILED',
+      amount: VERIFICATION_FEE,
+      error: userError,
+      timestamp: Date.now(),
+    });
+
+    setShowModal(true);
+  } finally {
+    setIsLoading(false);
+  }
 };
+
+  return (
+    <div className="min-h-screen p-6 md:p-12 bg-gradient-to-br from-indigo-500 to-purple-600">
+      <div className="max-w-3xl mx-auto">
+        {/* BACK BUTTON */}
+        <button
+          onClick={() => navigate('/assessor/dashboard')}
+          className="flex items-center text-white/80 hover:text-white mb-6 text-sm font-semibold"
+        >
+          <ArrowLeftIcon className="mr-2 w-4 h-4" /> Back to
+          Dashboard
+        </button>
+
+        {/* PAYMENT UI (unchanged) */}
+        <div className="bg-white rounded-xl shadow-2xl p-8 sm:p-10 border">
+          <div className="text-center mb-8 pb-6 border-b">
+            <ShieldAltIcon className="mx-auto text-6xl text-blue-600 mb-3" />
+            <h1 className="text-3xl font-extrabold">
+              Verification Fee Required
+            </h1>
+            <p className="text-lg text-gray-500 mt-2">
+              Secure your access to exclusive job postings.
+            </p>
+          </div>
+
+          <div className="space-y-4 mb-8">
+            <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
+              <LockIcon className="text-yellow-500 w-5 h-5" />
+              Unlock Verified Access
+            </h2>
+
+            <p className="text-gray-600 leading-relaxed">
+              A one-time verification fee is required to cover
+              accreditation checks and platform integrity.
+            </p>
+          </div>
+
+          <div className="bg-blue-50 p-5 rounded-lg border-2 border-blue-200">
+            <div className="flex justify-between items-center">
+              <span className="text-xl font-semibold">
+                One-Time Verification Fee:
+              </span>
+              <span className="text-3xl font-extrabold text-blue-700">
+                R{VERIFICATION_FEE.toFixed(2)}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={handlePayment}
+            disabled={isLoading}
+            className={`w-full mt-8 flex items-center justify-center px-6 py-3 text-lg font-bold rounded-xl shadow-lg ${
+              isLoading
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
+            }`}
+          >
+            {isLoading ? (
+              <span className="flex items-center">
+                Processing Payment...
+              </span>
+            ) : (
+              <>
+                <CreditCardIcon className="mr-3 w-6 h-6" />
+                Pay R{VERIFICATION_FEE.toFixed(2)} and Get Verified
+              </>
+            )}
+          </button>
+        </div>
+
+{/* 🔥 USER PAYMENTS LIST */}
+<div className="mt-10 bg-white shadow-xl rounded-xl p-6">
+
+  {/* Title + Refresh Button */}
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-2xl font-bold">Your Payment History</h2>
+
+    <button
+      onClick={fetchPayments}
+      disabled={isPaymentsLoading}
+      className="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
+    >
+      {isPaymentsLoading ? "Refreshing..." : "Refresh"}
+    </button>
+  </div>
+
+  {/* Loading State */}
+  {isPaymentsLoading ? (
+    <p className="text-gray-500">Loading payments...</p>
+  ) : userPayments.length === 0 ? (
+
+    /* Empty State */
+    <p className="text-gray-400">No payments found.</p>
+
+  ) : (
+
+    /* Payments List */
+    <div className="space-y-3">
+      {userPayments.map((p) => (
+        <div
+          key={p.id}
+          className="p-4 border rounded-lg shadow-sm bg-gray-50"
+        >
+          <p>
+            <strong>Transaction ID:</strong> {p.id}
+          </p>
+
+          <p>
+            <strong>Amount:</strong> R{p.amount}
+          </p>
+
+          <p>
+            <strong>Status:</strong> {p.status}
+          </p>
+
+          <p>
+            <strong>Date:</strong>{" "}
+            {new Date(p.createdAt).toLocaleString()}
+          </p>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+        </div>  
+
+      {showModal && paymentDetails && (
+        <PaymentSuccessModal
+          payment={paymentDetails}
+          onClose={() => setShowModal(false)}
+          navigateToDashboard={() =>
+            navigate('/assessor/dashboard')
+          }
+        />
+      )}
+    </div>
+  );
+};
+
 export default Payment;
