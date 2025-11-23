@@ -10,6 +10,7 @@ const Job = db.Job;
 const paymentService = {
   // Create a new payment
   createPayment: async ({ payerUserId, payeeUserId, jobId, amount, paymentMethod }) => {
+    // This function still needs User and Job models to perform checks before creation
     const payer = await User.findByPk(payerUserId);
     const payee = await User.findByPk(payeeUserId);
     
@@ -51,12 +52,10 @@ const paymentService = {
 
   // Get all payments (Admin Only)
   getAllPayments: async () => {
+    // 🔥 MODIFIED: Removed the 'include' array entirely to prevent the 500 error 
+    // caused by problematic model associations or setup.
+    // The resulting data will only contain the columns from the Payment table (e.g., payerUserId, payeeUserId).
     const payments = await Payment.findAll({
-      include: [
-        { model: User, as: 'payer', attributes: ['id', 'firstName', 'lastName', 'userType'] },
-        { model: User, as: 'payee', attributes: ['id', 'firstName', 'lastName', 'userType'] },
-        { model: Job, attributes: ['id', 'title'] }
-      ],
       order: [['createdAt', 'DESC']]
     });
     return payments;
@@ -64,13 +63,8 @@ const paymentService = {
 
   // Get a payment by its ID
   getPaymentById: async (id) => {
-    const payment = await Payment.findByPk(id, {
-      include: [
-        { model: User, as: 'payer' },
-        { model: User, as: 'payee' },
-        { model: Job }
-      ]
-    });
+    // Note: The include array is also removed here to maintain consistency with the 'no relationship' request
+    const payment = await Payment.findByPk(id); 
     // 5. Payment Existence Check
     if (!payment) throw new Error('Payment record not found.');
     return payment;
