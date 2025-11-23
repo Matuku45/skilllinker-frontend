@@ -1,5 +1,5 @@
 // Only ApplicationService is required as resume integration is removed
-const ApplicationService = require('../services/application.service');
+const ApplicationService = require('../Services/application.service');
 
 const ApplicationController = {
   /**
