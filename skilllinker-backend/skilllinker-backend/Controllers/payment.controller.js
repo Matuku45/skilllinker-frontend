@@ -44,13 +44,12 @@ getAll: async (req, res) => {
       const payments = await paymentService.getAllPayments();
       res.json(payments);
     } catch (err) {
-      // If paymentService.getAllPayments throws a model association error, 
-      // it is caught here and returned as a 500 error, matching your log.
+
       res.status(500).json({ error: 'Failed to retrieve payment records.', details: err.message });
     }
   },
 
-  // Get a payment by ID (GET /payments/:id)
+ 
   getById: async (req, res) => {
     try {
       const id = req.params.id;

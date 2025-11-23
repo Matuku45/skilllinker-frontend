@@ -1,111 +1,112 @@
-const { Message, User, Job } = require('../sqlmodel/models');
+const { User, Message } = require('../sqlmodel/models'); // ✅ ADDED Message model here
+const { Op } = require('sequelize');            // ✅ Import Op for query operators
+const messageService = require('../Services/message.services');
 
 /**
- * Sends a single message
+ * Send single message
+ * POST /api/messages
  */
-exports.sendMessage = async ({ fromUserId, toUserId, jobId, content }) => {
-  return await Message.create({ fromUserId, toUserId, jobId, content });
+exports.sendMessage = async (req, res) => {
+  try {
+    const message = await messageService.sendMessage(req.body);
+    res.status(201).json(message);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 /**
- * Sends multiple messages at once (batch)
+ * Get all messages (for admin or testing purposes)
+ * GET /api/messages
  */
-exports.sendMessagesBatch = async (messagesArray) => {
-  if (!messagesArray || messagesArray.length === 0) return [];
-  return await Message.bulkCreate(messagesArray);
-};
-
-/**
- * Retrieves ALL messages, enriched with sender/recipient/job details.
- * This is meant for admin/testing purposes.
- */
-exports.getAllMessages = async () => {
+exports.getAllMessages = async (req, res) => {
+  try {
+    // Fetches all messages, ordered by timestamp descending
     const messages = await Message.findAll({
-        order: [['timestamp', 'DESC']]
+      order: [['timestamp', 'DESC']]
+    });
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+/**
+ * Get all messages for a user
+ * GET /api/messages/user/:userId
+ */
+exports.getUserMessages = async (req, res) => {
+  try {
+    const messages = await messageService.getUserMessages(req.params.userId);
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Mark message as read
+ * PUT /api/messages/:messageId/read
+ */
+exports.markAsRead = async (req, res) => {
+  try {
+    const updatedMessage = await messageService.markAsRead(req.params.messageId);
+    res.json(updatedMessage);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Get messages for a job
+ * GET /api/messages/job/:jobId
+ */
+exports.getJobMessages = async (req, res) => {
+  try {
+    const messages = await messageService.getJobMessages(req.params.jobId);
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Broadcast job notification to all relevant users
+ * This is called internally by the job controller.
+ */
+exports.broadcastJobNotification = async (jobDetails, posterId) => {
+  try {
+    // Find all recipients except the poster
+    const recipients = await User.findAll({
+      where: {
+        id: { [Op.ne]: posterId }, // exclude poster
+        userType: { [Op.in]: ['assessor', 'moderator', 'sdp', 'admin'] } // include all relevant roles
+      }
     });
 
-    // Enriched messages will include sender, recipient, and job details
-    const enrichedMessages = await Promise.all(
-        messages.map(async (msg) => {
-            const sender = await User.findByPk(msg.fromUserId);
-            const recipient = await User.findByPk(msg.toUserId);
-            let job = null;
-            if (msg.jobId) job = await Job.findByPk(msg.jobId);
+    if (!recipients || recipients.length === 0) return [];
 
-            return {
-                ...msg.dataValues,
-                sender: sender ? { id: sender.id, name: sender.name, email: sender.email } : null,
-                recipient: recipient ? { id: recipient.id, name: recipient.name, email: recipient.email } : null,
-                job: job ? { id: job.id, title: job.title } : null
-            };
-        })
-    );
+    const broadcastMessages = recipients.map(user => ({
+      timestamp: new Date(),
+      read: false,
+      fromUserId: posterId,
+      toUserId: user.id,
+      jobId: jobDetails.id,
+      // Fixed syntax: Using backticks for template literal
+      content: `📢 New job posted: "${jobDetails.title}". Apply now!` 
+    }));
 
-    return enrichedMessages;
-};
+    const results = await messageService.sendMessagesBatch(broadcastMessages);
 
+    // Fixed syntax: Using backticks for template literal
+    console.log(`Broadcast successful for Job ID ${jobDetails.id} to ${recipients.length} users.`);
 
-/**
- * Retrieves all messages for a user
- */
-exports.getUserMessages = async (userId) => {
-  const messages = await Message.findAll({
-    where: { toUserId: userId },
-    order: [['timestamp', 'DESC']]
-  });
+    return results;
+  } catch (err) {
+    // Fixed syntax: Using backticks for template literal
+    console.error(`Broadcast failed for Job ID ${jobDetails.id}:`, err);
 
-  // Manually enrich with sender and recipient info
-  const enrichedMessages = await Promise.all(
-    messages.map(async (msg) => {
-      const sender = await User.findByPk(msg.fromUserId);
-      const recipient = await User.findByPk(msg.toUserId);
-      let job = null;
-      if (msg.jobId) job = await Job.findByPk(msg.jobId);
-
-      return {
-        ...msg.dataValues,
-        sender: sender ? { id: sender.id, name: sender.name, email: sender.email } : null,
-        recipient: recipient ? { id: recipient.id, name: recipient.name, email: recipient.email } : null,
-        job: job ? { id: job.id, title: job.title } : null
-      };
-    })
-  );
-
-  return enrichedMessages;
-};
-
-/**
- * Marks a message as read
- */
-exports.markAsRead = async (messageId) => {
-  const message = await Message.findByPk(messageId);
-  if (!message) throw new Error('Message not found');
-  message.read = true;
-  await message.save();
-  return message;
-};
-
-/**
- * Retrieves messages for a specific job
- */
-exports.getJobMessages = async (jobId) => {
-  const messages = await Message.findAll({
-    where: { jobId },
-    order: [['timestamp', 'ASC']]
-  });
-
-  const enrichedMessages = await Promise.all(
-    messages.map(async (msg) => {
-      const sender = await User.findByPk(msg.fromUserId);
-      const recipient = await User.findByPk(msg.toUserId);
-
-      return {
-        ...msg.dataValues,
-        sender: sender ? { id: sender.id, name: sender.name, email: sender.email } : null,
-        recipient: recipient ? { id: recipient.id, name: recipient.name, email: recipient.email } : null
-      };
-    })
-  );
-
-  return enrichedMessages;
+    throw err;
+  }
 };
