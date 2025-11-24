@@ -18,7 +18,9 @@ var app = express();
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://skilllinker-frontend.fly.dev'
+  'https://skilllinker-frontend.fly.dev',
+  'https://skilllinker-frontend-2.onrender.com',
+
 ];
 
 app.use(cors({
