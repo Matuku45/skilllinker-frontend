@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     verified: { type: DataTypes.BOOLEAN, defaultValue: false },
 
     userType: { 
-      type: DataTypes.ENUM('assessor', 'moderator', 'sdp'),
+      type: DataTypes.ENUM('assessor', 'moderator', 'sdp','admin'),
       allowNull: false
     },
 
