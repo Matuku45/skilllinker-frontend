@@ -1,338 +1,235 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaCheck, FaTimesCircle } from "react-icons/fa";
+
+import { useAuth } from "../../contexts/AuthContext";
+import { useAssessor } from "../../contexts/AssessorContext";
+
 import axios from "axios";
-import { useAuth } from "../../contexts/AuthContext"; // Assuming AuthContext is correctly structured
-import { FaBriefcase, FaMapMarkerAlt, FaCalendarAlt, FaCheck, FaTimesCircle } from "react-icons/fa"; // Using react-icons
 
-// --- ApplicationModal Component (Required for Apply button functionality) ---
+const API_BASE_URL = "https://skilllinker-frontend.onrender.com/api";
 
+// --- Application Modal ---
 const ApplicationModal = ({ job, onClose, onSubmit }) => {
-    const [coverLetter, setCoverLetter] = useState('');
-    const [error, setError] = useState(null);
+  const [coverLetter, setCoverLetter] = useState('');
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!coverLetter.trim()) {
-            setError("Cover letter is required.");
-            return;
-        }
-        onSubmit(coverLetter);
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    return (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
-                <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h2 className="text-xl font-bold text-blue-600">Apply for: {job.title}</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-red-500 transition">
-                        <FaTimesCircle className="w-6 h-6" />
-                    </button>
-                </div>
-                {error && (
-                    <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-sm font-medium">{error}</div>
-                )}
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor="coverLetter" className="block text-gray-700 font-medium mb-2">
-                        Cover Letter
-                    </label>
-                    <textarea
-                        id="coverLetter"
-                        rows="6"
-                        value={coverLetter}
-                        onChange={(e) => { setCoverLetter(e.target.value); setError(null); }}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 resize-none"
-                        placeholder="Tell us why you are the perfect candidate..."
-                    ></textarea>
-
-                    <div className="mt-6 flex justify-end space-x-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
-                        >
-                            Submit Application
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-// --- JobDetails Component (API Fetching Logic) ---
-
-const JobDetails = () => {
-    const { id: urlId } = useParams(); // ID from URL path (e.g., '/jobs/1')
-    const navigate = useNavigate();
-    const { currentUser, isAuthenticated } = useAuth(); // Get user and token
-
-    // State for the job data
-    const [job, setJob] = useState(null);
-    // State for the ID typed into the input field
-    const [jobIdInput, setJobIdInput] = useState(urlId || ''); 
-    // State to trigger the actual fetch, derived from URL or input
-    const [currentJobId, setCurrentJobId] = useState(urlId ? Number(urlId) : null); 
-    
-    // UI states
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-
-    const API_BASE_URL = "http://localhost:3000/api";
-
-    /**
-     * Effect to fetch the job details from the API.
-     * Runs whenever currentJobId changes.
-     */
-    useEffect(() => {
-        const fetchJob = async () => {
-            if (!currentJobId || isNaN(currentJobId)) {
-                setJob(null);
-                // Only show a specific error if we tried to load an invalid ID
-                if (currentJobId) setError("Invalid Job ID provided."); 
-                return;
-            }
-
-            if (!isAuthenticated || !currentUser?.token) {
-                 setError("Authentication required to view job details.");
-                 setLoading(false);
-                 return;
-            }
-
-            setLoading(true);
-            setError(null);
-            setJob(null); // Clear job while loading new one
-
-            try {
-                // ✅ REAL API CALL: Fetch job data with Authorization header
-                const res = await axios.get(`${API_BASE_URL}/jobs/${currentJobId}`, {
-                    headers: { 
-                        Authorization: `Bearer ${currentUser.token}` 
-                    },
-                });
-                
-                setJob(res.data);
-            } catch (err) {
-                console.error("Job Fetch Error:", err);
-                const errorMessage = err.response?.data?.message || "Failed to fetch job.";
-                setError(errorMessage);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (currentJobId) {
-            fetchJob();
-        }
-    }, [currentJobId, currentUser?.token, isAuthenticated]); 
-
-    /**
-     * Handler for the manual ID input button.
-     * Updates the currentJobId state, which triggers the useEffect.
-     */
-    const handleLoadJob = () => {
-        setError(null);
-        const newId = Number(jobIdInput);
-        if (isNaN(newId) || newId <= 0) {
-            setError("Please enter a valid numeric Job ID.");
-            return;
-        }
-        // Update the source of truth, triggering the useEffect
-        setCurrentJobId(newId);
-    };
-
-    /**
-     * Handler to go back in browser history or navigate to the dashboard.
-     */
-    const handleBack = () => {
-        if (window.history.length > 1) navigate(-1);
-        else navigate("/assessor/dashboard");
-    };
-
-    /**
-     * Handler for the application submission.
-     */
-    const handleApplication = async (coverLetter) => {
-        setError(null);
-        if (!job || !currentUser || !currentUser.id) {
-            setError("Cannot apply: User not fully authenticated or job not loaded.");
-            return;
-        }
-
-        try {
-            // ✅ REAL API CALL: Post application data with Authorization header
-            await axios.post(
-                `${API_BASE_URL}/applications`,
-                { jobId: job.id, userId: currentUser.id, coverLetter },
-                { 
-                    headers: { 
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${currentUser.token}` 
-                    } 
-                }
-            );
-            
-            alert(`Application for Job ID ${job.id} submitted successfully!`);
-            setShowModal(false);
-        } catch (err) {
-            console.error("Application submission error:", err);
-            const errorMessage = err.response?.data?.message || err.message;
-            setError(`Application failed: ${errorMessage}`);
-            setShowModal(false);
-        }
-    };
-
-
-    // --- RENDER LOGIC ---
-
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
-                <p className="p-6 text-gray-500 text-xl animate-pulse rounded-xl bg-white shadow">
-                    Loading job details for ID {currentJobId}...
-                </p>
-            </div>
-        );
+    if (!coverLetter.trim()) {
+      setError("Cover letter is required.");
+      return;
     }
-    
-    const renderLoadInput = (currentId = null) => (
-        <div className="flex space-x-2 mb-6 p-4 bg-white rounded-xl shadow-lg border border-gray-200">
-            <input
-                type="number"
-                value={jobIdInput}
-                onChange={(e) => { setJobIdInput(e.target.value); setError(null); }}
-                placeholder={currentId ? `Currently loaded ID: ${currentId}` : "Enter Job ID (e.g., 50)"}
-                className="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-            />
+
+    setSubmitting(true);
+    await onSubmit(coverLetter);
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+
+        <div className="flex justify-between items-center border-b pb-3 mb-4">
+          <h2 className="text-xl font-bold">Apply for: {job.title}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <FaTimesCircle className="w-6 h-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          {error && <p className="text-red-500 mb-4">{error}</p>}
+
+          <label htmlFor="coverLetter" className="block text-sm font-medium text-gray-700 mb-2">
+            Cover Letter
+          </label>
+
+          <textarea
+            id="coverLetter"
+            rows="6"
+            value={coverLetter}
+            onChange={(e) => { setCoverLetter(e.target.value); setError(null); }}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 resize-none"
+            placeholder="Write your cover letter..."
+          />
+
+          <div className="mt-6 flex justify-end space-x-3">
             <button
-                onClick={handleLoadJob}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition font-medium"
+              type="button"
+              onClick={onClose}
+              className="py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              disabled={submitting}
             >
-                Load Job
+              Cancel
             </button>
-        </div>
-    );
 
-    // Initial state or explicit error when no job is present
-    if (error || !job) { 
-        return (
-            <div className="min-h-screen p-6 bg-gray-50 max-w-3xl mx-auto">
-                <h2 className="text-2xl font-bold mb-4 text-gray-700">Job Details</h2>
-                
-                {error && (
-                    <div className="p-4 rounded-lg mb-6 shadow-md font-medium bg-red-100 text-red-700">
-                        <FaTimesCircle className="inline w-5 h-5 mr-2" />
-                        **Error:** {error}
-                    </div>
-                )}
-                
-                <div className="text-center text-gray-500 mt-12 mb-6">
-                    {error ? "Please correct the ID or authenticate." : "No job loaded. Please enter a Job ID."}
-                </div>
-                
-                {renderLoadInput()}
-            </div>
-        );
-    }
-    
-    // Main Content Render
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 p-6">
-            <div className="max-w-3xl mx-auto">
-                {/* BACK BUTTON */}
-                <button
-                    onClick={handleBack}
-                    className="mb-4 px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
-                >
-                    ← Back
-                </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className={`py-2 px-4 rounded-lg text-white ${submitting ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
+            >
+              {submitting ? "Submitting..." : "Submit"}
+            </button>
+          </div>
 
-                {/* ID Input & Loader Section */}
-                <h2 className="text-2xl font-bold mb-4 text-gray-800">Load Another Job</h2>
-                {renderLoadInput(job.id)}
-                
-                {/* Application Error Message Box (for submission failures) */}
-                {error && (
-                    <div className={`p-4 rounded-lg mb-6 shadow-md font-medium bg-red-100 text-red-700`}>
-                        <FaTimesCircle className="inline w-5 h-5 mr-2" />
-                        **Submission Error:** {error}
-                    </div>
-                )}
-                
-                {/* Job Card */}
-                <div className="bg-white rounded-xl shadow-xl p-8 border border-gray-100">
-                    <div className="flex justify-between items-start">
-                        <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
-                        <span className="px-3 py-1 text-sm rounded-full bg-green-100 text-green-700">
-                            {job.status}
-                        </span>
-                    </div>
+        </form>
 
-                    <p className="mt-4 text-gray-700 text-lg leading-relaxed">{job.description}</p>
-
-                    {/* Job Info */}
-                    <div className="mt-6 space-y-3">
-                        <div className="flex items-center text-gray-600">
-                            <FaBriefcase className="w-5 h-5 mr-2 text-blue-500" />
-                            <span>**Company:** {job.sdpName || "N/A"}</span>
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                            <FaMapMarkerAlt className="w-5 h-5 mr-2 text-red-500" />
-                            <span>**Location:** {job.location}</span>
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                            <FaCalendarAlt className="w-5 h-5 mr-2 text-purple-500" />
-                            <span>
-                                **Deadline:** <strong>{job.deadline ? new Date(job.deadline).toLocaleDateString() : 'N/A'}</strong>
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Qualifications */}
-                    <div className="mt-8">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Required Qualifications:</h3>
-                        <ul className="space-y-2">
-                            {job.requiredQualifications?.map((qual, index) => (
-                                <li
-                                    key={index}
-                                    className="flex items-center bg-gray-100 p-2 rounded-lg text-gray-700"
-                                >
-                                    <FaCheck className="w-4 h-4 mr-2 text-green-600" /> {qual}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Apply Button */}
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className="mt-8 w-full py-3 bg-blue-600 text-white rounded-lg shadow-lg text-lg font-medium hover:bg-blue-700 transition"
-                        disabled={job.status !== 'open' || !isAuthenticated}
-                    >
-                        {isAuthenticated ? `Apply for this Job (ID: ${job.id})` : "Login to Apply"}
-                    </button>
-                    {!isAuthenticated && (
-                        <p className="text-center text-red-500 text-sm mt-2">You must be logged in to apply.</p>
-                    )}
-                </div>
-
-                {/* Application Modal */}
-                {showModal && job && (
-                    <ApplicationModal
-                        job={job}
-                        onClose={() => setShowModal(false)}
-                        onSubmit={(coverLetter) => handleApplication(coverLetter)}
-                    />
-                )}
-            </div>
-        </div>
-    );
+      </div>
+    </div>
+  );
 };
 
-export default JobDetails;
+// --- Job List Page ---
+const JobListPage = () => {
+  const navigate = useNavigate();
+  const { currentUser, isAuthenticated } = useAuth();
+  const { jobs, applyToJob } = useAssessor();
+
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  // ✅ FIXED: SEND jobId & userId CORRECTLY
+const handleApply = async (coverLetter) => {
+  if (!selectedJob) return;
+
+  if (!currentUser || !currentUser.id) {
+    alert("User not authenticated.");
+    return;
+  }
+
+  try {
+    const payload = {
+      jobId: Number(selectedJob.id),
+      userId: Number(currentUser.id),
+      coverLetter: coverLetter
+    };
+
+    console.log("📤 Sending Application Payload:", payload);
+
+    const response = await axios.post(
+      `${API_BASE_URL}/applications`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${currentUser.token}`
+        }
+      }
+    );
+
+    alert("Application submitted!");
+    setShowModal(false);
+    setSelectedJob(null);
+
+  } catch (err) {
+    console.error("❌ Application API Error:", err.response?.data || err);
+    alert(err.response?.data?.message || err.message || "Failed to submit application.");
+  }
+};
+
+
+  if (!jobs || jobs.length === 0)
+    return <div className="p-6 text-center text-xl">Loading jobs list...</div>;
+
+  return (
+    <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
+
+      <button onClick={() => navigate(-1)} className="text-blue-600 hover:text-blue-800 mb-4 font-medium">
+        ← Back
+      </button>
+
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">All Jobs</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {jobs.map(job => {
+          const qualifications = Array.isArray(job.requiredQualifications)
+            ? job.requiredQualifications
+            : job.requiredQualifications
+            ? [job.requiredQualifications]
+            : [];
+
+          return (
+            <div key={job.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow rounded-xl p-6 border border-gray-200">
+
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">{job.title}</h2>
+              <p className="text-sm text-gray-600 line-clamp-3">{job.description}</p>
+
+              <div className="mt-4 space-y-2 text-sm">
+                <div className="flex items-center text-gray-600">
+                  <FaBriefcase className="w-4 h-4 mr-2 text-blue-500" /> Company: {job.sdpName || "N/A"}
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <FaMapMarkerAlt className="w-4 h-4 mr-2 text-red-500" /> Location: {job.location || "N/A"}
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <FaCalendarAlt className="w-4 h-4 mr-2 text-purple-500" /> Deadline: {job.deadline ? new Date(job.deadline).toLocaleDateString() : "N/A"}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <h3 className="font-semibold text-gray-800 mb-1">Required Qualifications:</h3>
+
+                <ul className="space-y-1 text-sm">
+
+                  {qualifications.slice(0, 3).map((q, i) => {
+                    const content =
+                      typeof q === "string"
+                        ? q
+                        : `${q.skills || ''}${q.experience ? ' - ' + q.experience : ''}`;
+
+                    return (
+                      <li key={i} className="flex items-start text-gray-700">
+                        <FaCheck className="w-3 h-3 mr-2 mt-1 text-green-600 flex-shrink-0" />
+                        <span className="line-clamp-1">{content}</span>
+                      </li>
+                    );
+                  })}
+
+                  {qualifications.length > 3 && (
+                    <li className="text-gray-500 text-xs mt-1">
+                      ...and {qualifications.length - 3} more
+                    </li>
+                  )}
+
+                  {qualifications.length === 0 && (
+                    <li className="text-gray-500">No qualifications listed</li>
+                  )}
+
+                </ul>
+              </div>
+
+              <button
+                onClick={() => { setSelectedJob(job); setShowModal(true); }}
+                disabled={!isAuthenticated || job.status !== "open"}
+                className={`mt-6 w-full py-2 rounded text-white font-medium transition-colors 
+                  ${!isAuthenticated || job.status !== "open"
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+              >
+                {isAuthenticated ? "Apply for this Job" : "Login to Apply"}
+              </button>
+
+            </div>
+          );
+        })}
+
+      </div>
+
+      {showModal && selectedJob && (
+        <ApplicationModal
+          job={selectedJob}
+          onClose={() => { setShowModal(false); setSelectedJob(null); }}
+          onSubmit={handleApply}
+        />
+      )}
+
+    </div>
+  );
+};
+
+export default JobListPage;

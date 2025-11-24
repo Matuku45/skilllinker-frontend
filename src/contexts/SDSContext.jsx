@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // NOTE: The API_URL was missing the closing backtick, I've assumed you intended to close it on the same line.
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://skilllinker-frontend.onrender.com/api";
 
 /**
  * Job-related API calls

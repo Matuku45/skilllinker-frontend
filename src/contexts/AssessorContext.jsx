@@ -15,7 +15,7 @@ export const AssessorProvider = ({ children }) => {
   const [resume, setResume] = useState(null);
   const [loadingResume, setLoadingResume] = useState(false);
 
-  const apiUrl = 'http://localhost:3000/api';
+  const apiUrl = 'https://skilllinker-frontend.onrender.com/api';
 
   // ---------------------------
   // Jobs

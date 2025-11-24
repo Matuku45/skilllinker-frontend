@@ -8,7 +8,7 @@ import {
 import axios from "axios";
 
 // --- Configuration ---
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://skilllinker-frontend.onrender.com/api";
 
 const SDS_Dashboard = () => {
     // --- Hooks & Context ---

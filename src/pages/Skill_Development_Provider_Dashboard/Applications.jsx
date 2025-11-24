@@ -46,7 +46,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext'; 
 
 // Define API_URL for direct axios use (replace with your actual base URL)
-const API_URL = 'http://localhost:3000/api'; 
+const API_URL = 'https://skilllinker-frontend.onrender.com/api'; 
 
 // Define Status Options for the Dropdown (used for Applications)
 // NOTE: 'New' and 'Reviewed' are used for display but will be mapped to 'pending'

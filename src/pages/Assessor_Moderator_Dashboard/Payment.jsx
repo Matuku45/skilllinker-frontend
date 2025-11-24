@@ -151,7 +151,7 @@ const Payment = () => {
     setIsPaymentsLoading(true);
     try {
       const res = await axios.get(
-        'http://localhost:3000/api/payments',
+        'https://skilllinker-frontend.onrender.com/payments',
         {
           headers: {
             Authorization: `Bearer ${currentUser.token}`,
@@ -193,7 +193,7 @@ const handlePayment = async () => {
     };
 
     const res = await axios.post(
-      'http://localhost:3000/api/payments',
+      'https://skilllinker-frontend.onrender.com/api/payments',
       payload,
       {
         headers: {

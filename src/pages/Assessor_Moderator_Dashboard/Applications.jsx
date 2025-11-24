@@ -3,7 +3,7 @@ import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://skilllinker-frontend.onrender.com/api";
 
 const ApplicationsList = () => {
   const { token, currentUser } = useAuth();

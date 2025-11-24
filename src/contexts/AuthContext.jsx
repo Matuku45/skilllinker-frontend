@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
   const [loadingResume, setLoadingResume] = useState(false);
 
   // Set the base API URL
-  const API_URL = "http://localhost:3000/api"; 
+  const API_URL = "https://skilllinker-frontend.onrender.com/api"; 
 
   // --- Initialization and User Loading ---
   useEffect(() => {

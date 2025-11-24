@@ -193,7 +193,7 @@ const AdminDashboard = () => {
   // Fetch jobs
   const fetchJobs = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/jobs');
+      const res = await axios.get('https://skilllinker-frontend.onrender.com/api/jobs');
       setJobs(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error fetching jobs:', err);
@@ -205,7 +205,7 @@ const AdminDashboard = () => {
     if (!currentUser?.token) return;
     setIsPaymentsLoading(true);
     try {
-      const res = await axios.get('http://localhost:3000/api/payments', {
+      const res = await axios.get('https://skilllinker-frontend.onrender.com/api/payments', {
         headers: { Authorization: `Bearer ${currentUser.token}` }
       });
       setPayments(Array.isArray(res.data) ? res.data : []);

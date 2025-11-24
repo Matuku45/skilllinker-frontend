@@ -106,7 +106,7 @@ const handleSubmit = async (e) => {
     try {
         // 1️⃣ Post the job
         const jobResponse = await axios.post(
-            "http://localhost:3000/api/jobs",
+            "https://skilllinker-frontend.onrender.com/api/jobs",
             jobPayload,
             {
                 headers: {

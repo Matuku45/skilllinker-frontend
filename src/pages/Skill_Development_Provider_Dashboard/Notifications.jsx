@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import { useAuth } from "../../contexts/AuthContext";
 
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://skilllinker-frontend.onrender.com/api";
 
 const Notifications = () => {
   const { token, currentUser } = useAuth();

@@ -1,7 +1,7 @@
 // C:\Users\Thabiso\skilllinker-frontend\src\contexts\AdminContext.jsx
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/users";
+const API_URL = "https://skilllinker-frontend.onrender.com/api/users";
 
 const getToken = () => localStorage.getItem("skilllinker_token");
 
